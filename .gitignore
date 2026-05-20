@@ -1,0 +1,56 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+
+# Virtual environments
+venv/
+.env/
+.venv/
+
+# Environment variables
+.env
+
+# Node modules
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# Logs
+*.log
+
+# VS Code
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Neo4j local files
+*.dump
+
+# Temporary/cache
+.cache/
+tmp/
+
+# Python cache
+.pytest_cache/
+
+# Coverage
+htmlcov/
+.coverage
+
+# Frontend cache
+frontend/node_modules/
+frontend/dist/
+
+# Backend cache
+backend/__pycache__/
+
+# Data cache (optional)
+backend/data/*.tmp
