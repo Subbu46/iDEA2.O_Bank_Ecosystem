@@ -509,7 +509,7 @@ ${rcaReport.preventionMeasures}
                     </div>
                   ) : (
                     <div className="py-24 text-center text-slate-500 flex flex-col items-center gap-2">
-                      <span>🛡️</span>
+                      <span><span role="img" aria-label="shield">🛡️</span></span>
                       <p className="text-xs">Select a top-risk CVE on the left to review its mitigation playbook.</p>
                     </div>
                   )}

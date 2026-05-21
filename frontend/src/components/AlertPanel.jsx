@@ -307,7 +307,7 @@ export default function AlertPanel() {
 
           {filteredAlerts.length === 0 && (
             <div className="col-span-full h-[30vh] flex flex-col items-center justify-center text-slate-500 text-sm gap-2">
-              <span>🛡️</span>
+              <span><span role="img" aria-label="shield">🛡️</span></span>
               <span>All clear. No active alerts meet the selected query filters.</span>
             </div>
           )}

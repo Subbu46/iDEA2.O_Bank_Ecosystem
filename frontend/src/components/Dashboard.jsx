@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid } from 'recharts';
 import { ShieldAlert, Target, Network, AlertOctagon, LayoutDashboard, Clock, Eye, AlertTriangle, Cpu, Zap, Radio, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -203,7 +203,7 @@ export default function Dashboard() {
             <StatCard title="Attack Paths Found" value={stats.attackPaths} icon={Network} colorClass="bg-purple-500/10 text-purple-400 border border-purple-500/20" delay={0.2} />
           </div>
 
-          {/* â”€â”€ Gen-AI Threat Intelligence Analysis Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+          {/* -- Gen-AI Threat Intelligence Analysis Section -- */}
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
@@ -228,7 +228,7 @@ export default function Dashboard() {
                   <div className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/20 shadow-[0_0_12px_rgba(6,182,212,0.15)]">
                     <Cpu className="text-cyan-400" size={22} />
                   </div>
-                  ðŸ¤– Gen-AI Threat Intelligence Analysis
+                  <span role="img" aria-label="robot">🤖</span> Gen-AI Threat Intelligence Analysis
                 </h3>
                 <p className="text-sm text-slate-400 mt-1.5 ml-1">
                   Gemini AI analyses your full CVE dataset, maps MITRE ATT&CK techniques, and predicts the most likely kill chain
@@ -261,7 +261,7 @@ export default function Dashboard() {
                 ) : (
                   <>
                     <Zap size={18} className="text-cyan-400" />
-                    â–¶ Run AI Analysis on Vulnerability Dataset
+                    RUN AI Analysis on Vulnerability Dataset
                   </>
                 )}
               </motion.button>
@@ -282,11 +282,11 @@ export default function Dashboard() {
                 </div>
               )}
 
-              {/* Loading â€” fake AI logs */}
+              {/* Loading - fake AI logs */}
               {(aiState === 'loading' || (aiState === 'streaming' && aiLogs.length > 0 && aiDisplayText.length === 0)) && (
                 <div className="bg-black/60 rounded-xl border border-cyan-950/60 p-5 font-mono text-xs text-cyan-400 space-y-1.5 min-h-[180px]">
                   <div className="text-cyan-600 mb-3 text-[11px] tracking-widest uppercase">
-                    â—ˆ Sarathi AI Engine Â· Gemini 1.5 Pro Â· Threat Analysis Mode
+                    Sarathi AI Engine | Gemini 1.5 Pro | Threat Analysis Mode
                   </div>
                   <AnimatePresence>
                     {aiLogs.map((log, i) => (
@@ -316,7 +316,7 @@ export default function Dashboard() {
                 </div>
               )}
 
-              {/* Streaming / Done â€” typewriter terminal */}
+              {/* Streaming / Done - typewriter terminal */}
               {(aiState === 'streaming' || aiState === 'done') && aiDisplayText && (
                 <motion.div
                   initial={{ opacity: 0, y: 8 }}
@@ -329,7 +329,7 @@ export default function Dashboard() {
                     <span className="w-3 h-3 rounded-full bg-amber-500/70" />
                     <span className="w-3 h-3 rounded-full bg-emerald-500/70" />
                     <span className="ml-4 text-[11px] font-mono text-slate-600 tracking-widest uppercase">
-                      sarathi-ai Â· threat-intelligence-analysis Â· {new Date().toLocaleTimeString()}
+                      sarathi-ai | threat-intelligence-analysis | {new Date().toLocaleTimeString()}
                     </span>
                     {aiState === 'streaming' && (
                       <div className="ml-auto flex items-center gap-1.5 text-[11px] font-mono text-cyan-500">
@@ -348,12 +348,22 @@ export default function Dashboard() {
                   {/* Terminal body */}
                   <div
                     ref={terminalRef}
-                    className="bg-black/90 border border-slate-800 rounded-b-xl p-6 max-h-[520px] overflow-y-auto [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-slate-800 [&::-webkit-scrollbar-thumb]:rounded-full"
+                    className="bg-black/90 border border-slate-800 rounded-b-xl max-h-[520px] overflow-y-auto [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-slate-800 [&::-webkit-scrollbar-thumb]:rounded-full"
+                    style={{ padding: '24px', minHeight: '400px' }}
                   >
-                    <pre className="text-[13px] sm:text-[13.5px] text-emerald-300 font-mono whitespace-pre-wrap leading-relaxed break-words tracking-wide">
+                    <pre
+                      className="whitespace-pre-wrap break-words"
+                      style={{
+                        fontSize: '14px',
+                        lineHeight: '1.8',
+                        fontFamily: 'monospace',
+                        color: '#00ff88',
+                        letterSpacing: '0.3px',
+                      }}
+                    >
                       {aiDisplayText}
                       {aiState === 'streaming' && (
-                        <span className="inline-block w-2 h-4 bg-emerald-400 animate-pulse ml-0.5 translate-y-0.5" />
+                        <span className="inline-block w-2 h-4 bg-emerald-400 animate-pulse ml-0.5 translate-y-0.5" style={{ backgroundColor: '#00ff88' }} />
                       )}
                     </pre>
                   </div>
@@ -480,7 +490,7 @@ export default function Dashboard() {
                 ))}
                 {recentAlerts.length === 0 && (
                   <div className="flex-1 flex flex-col items-center justify-center text-slate-500 text-sm gap-2">
-                    <span>ðŸ›¡ï¸</span>
+                    <span><span role="img" aria-label="shield">🛡️</span></span>
                     <span>All systems clear. No incidents detected.</span>
                   </div>
                 )}

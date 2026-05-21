@@ -288,7 +288,7 @@ export default function PlaybookModal({ alert, onClose }) {
                   <ShieldAlert className="text-violet-400" size={22} />
                 </div>
                 <h2 className="text-2xl font-extrabold text-white tracking-tight">
-                  🛡️ AI-Generated Remediation Playbook
+                  <span role="img" aria-label="shield">🛡️</span> AI-Generated Remediation Playbook
                 </h2>
               </div>
               <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm font-mono text-slate-400 mt-1 pl-1">
