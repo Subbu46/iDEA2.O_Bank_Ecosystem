@@ -11,6 +11,7 @@ import DigitalTwin from './components/DigitalTwin';
 
 function AppContent() {
   const location = useLocation();
+  const isTwin = location.pathname === '/twin';
 
   const NavItem = ({ to, icon: Icon, label }) => (
     <NavLink
@@ -62,7 +63,7 @@ function AppContent() {
         {/* Subtle grid background overlay */}
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMWgyMHYyMEgxVjF6IiBmaWxsPSJub25lIiBzdHJva2U9InJnYmEoMjU1LDI1NSwyNTUsMC4wMykiIHN0cm9rZS13aWR0aD0iMScvPjwvc3ZnPg==')] opacity-50 pointer-events-none"></div>
         
-        <div className="flex-1 overflow-auto z-10 p-6">
+        <div className={`flex-1 z-10 ${isTwin ? 'overflow-hidden' : 'overflow-auto p-6'}`}>
           <AnimatePresence mode="wait">
             <Routes location={location} key={location.pathname}>
               <Route path="/" element={<AnimatedPage><Dashboard /></AnimatedPage>} />

@@ -52,88 +52,88 @@ def _get_engine() -> PlaybookGenerator:
     return _playbook_engine
 
 
-# ── Helper: fetch CVE dataset from Neo4j ────────────────────────────────────
-
 def _fetch_dataset() -> list[dict[str, Any]]:
     """Return a list of CVE records enriched with asset data."""
     db = _get_db()
 
+    mock_data = [
+        {
+            "cveId": "CVE-2026-1043",
+            "description": "Unauthenticated remote code execution via HTTP deserialization in banking web gateway",
+            "cvssScore": 9.8,
+            "epssScore": 0.9452,
+            "isKEV": True,
+            "severity": "CRITICAL",
+            "assetName": "External Web Application Gateway",
+            "assetType": "Web Application",
+            "assetCriticality": 10,
+            "techniqueId": "T1190",
+            "techniqueName": "Exploit Public-Facing Application",
+        },
+        {
+            "cveId": "CVE-2026-2090",
+            "description": "Privilege escalation via token manipulation in IAM authentication router",
+            "cvssScore": 8.8,
+            "epssScore": 0.87,
+            "isKEV": True,
+            "severity": "CRITICAL",
+            "assetName": "IAM Authentication Router",
+            "assetType": "Authentication Service",
+            "assetCriticality": 9,
+            "techniqueId": "T1068",
+            "techniqueName": "Exploitation for Privilege Escalation",
+        },
+        {
+            "cveId": "CVE-2026-3311",
+            "description": "SQL injection in transaction API allowing unauthorized database reads",
+            "cvssScore": 8.1,
+            "epssScore": 0.71,
+            "isKEV": False,
+            "severity": "HIGH",
+            "assetName": "Core Banking Database",
+            "assetType": "Database",
+            "assetCriticality": 10,
+            "techniqueId": "T1190",
+            "techniqueName": "Exploit Public-Facing Application",
+        },
+        {
+            "cveId": "CVE-2026-4455",
+            "description": "Weak cipher suite in SWIFT payment gateway TLS negotiation",
+            "cvssScore": 7.5,
+            "epssScore": 0.55,
+            "isKEV": False,
+            "severity": "HIGH",
+            "assetName": "SWIFT Payment Gateway",
+            "assetType": "Payment Gateway",
+            "assetCriticality": 10,
+            "techniqueId": "T1557",
+            "techniqueName": "Adversary-in-the-Middle",
+        },
+    ]
+
     if db.mock_mode:
         # Return representative mock dataset for demo / offline use
-        return [
-            {
-                "cveId": "CVE-2026-1043",
-                "description": "Unauthenticated remote code execution via HTTP deserialization in banking web gateway",
-                "cvssScore": 9.8,
-                "epssScore": 0.9452,
-                "isKEV": True,
-                "severity": "CRITICAL",
-                "assetName": "External Web Application Gateway",
-                "assetType": "Web Application",
-                "assetCriticality": 10,
-                "techniqueId": "T1190",
-                "techniqueName": "Exploit Public-Facing Application",
-            },
-            {
-                "cveId": "CVE-2026-2090",
-                "description": "Privilege escalation via token manipulation in IAM authentication router",
-                "cvssScore": 8.8,
-                "epssScore": 0.87,
-                "isKEV": True,
-                "severity": "CRITICAL",
-                "assetName": "IAM Authentication Router",
-                "assetType": "Authentication Service",
-                "assetCriticality": 9,
-                "techniqueId": "T1068",
-                "techniqueName": "Exploitation for Privilege Escalation",
-            },
-            {
-                "cveId": "CVE-2026-3311",
-                "description": "SQL injection in transaction API allowing unauthorized database reads",
-                "cvssScore": 8.1,
-                "epssScore": 0.71,
-                "isKEV": False,
-                "severity": "HIGH",
-                "assetName": "Core Banking Database",
-                "assetType": "Database",
-                "assetCriticality": 10,
-                "techniqueId": "T1190",
-                "techniqueName": "Exploit Public-Facing Application",
-            },
-            {
-                "cveId": "CVE-2026-4455",
-                "description": "Weak cipher suite in SWIFT payment gateway TLS negotiation",
-                "cvssScore": 7.5,
-                "epssScore": 0.55,
-                "isKEV": False,
-                "severity": "HIGH",
-                "assetName": "SWIFT Payment Gateway",
-                "assetType": "Payment Gateway",
-                "assetCriticality": 10,
-                "techniqueId": "T1557",
-                "techniqueName": "Adversary-in-the-Middle",
-            },
-        ]
+        return mock_data
 
     # Live Neo4j query: CVEs joined with affected assets and MITRE techniques
     try:
         results = db.run_query(
             """
-            MATCH (c:CVE)-[:AFFECTS]->(a:Asset)
-            OPTIONAL MATCH (c)-[:EXPLOITED_BY]->(t:Technique)
+            MATCH (a:Asset)-[:HAS_VULNERABILITY]->(v:Vulnerability)
+            OPTIONAL MATCH (v)-[:MAPS_TO_TECHNIQUE]->(t:Technique)
             RETURN
-                c.cveId            AS cveId,
-                c.description      AS description,
-                c.cvssScore        AS cvssScore,
-                c.epssScore        AS epssScore,
-                c.isKEV            AS isKEV,
-                c.severity         AS severity,
+                v.cve_id            AS cveId,
+                v.description      AS description,
+                v.cvss_score        AS cvssScore,
+                v.epss_score        AS epssScore,
+                v.is_kev            AS isKEV,
+                v.severity         AS severity,
                 a.name             AS assetName,
                 a.type             AS assetType,
                 a.criticality      AS assetCriticality,
-                t.techniqueId      AS techniqueId,
+                t.technique_id      AS techniqueId,
                 t.name             AS techniqueName
-            ORDER BY c.cvssScore DESC
+            ORDER BY v.cvss_score DESC
             LIMIT 20
             """
         )
@@ -158,7 +158,7 @@ def _fetch_dataset() -> list[dict[str, Any]]:
         logger.warning("Neo4j query failed in analyse-threats — using mock: %s", exc)
 
     # Final fallback if query returned nothing
-    return _fetch_dataset.__wrapped__() if hasattr(_fetch_dataset, "__wrapped__") else []
+    return mock_data
 
 
 # ── Deterministic fallback summary ──────────────────────────────────────────
