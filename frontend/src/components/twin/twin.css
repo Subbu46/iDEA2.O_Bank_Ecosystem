@@ -1,0 +1,572 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   twin.css — Enterprise Cyber-Infrastructure Light-Mode HUD Styling
+   Banking Digital Twin — Glassmorphism panels, corporate blues, clean whites
+   ─────────────────────────────────────────────────────────────────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+/* ── Root Container ──────────────────────────────────────────────────────── */
+.twin-root {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  background: #f0f2f5;
+}
+
+.twin-canvas-container {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+/* ── Top Command Bar ─────────────────────────────────────────────────────── */
+.twin-topbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 20px rgba(0, 0, 0, 0.02);
+  flex-wrap: wrap;
+}
+
+.twin-topbar-title {
+  flex: 1;
+  min-width: 180px;
+}
+
+.twin-topbar-title .brand {
+  font-size: 9.5px;
+  letter-spacing: 3.5px;
+  color: #2563eb;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.twin-topbar-title .subtitle {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: 0.3px;
+  margin-top: 1px;
+}
+
+/* ── Stats Badges ────────────────────────────────────────────────────────── */
+.twin-stat-badge {
+  text-align: center;
+  background: rgba(241, 245, 249, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  padding: 6px 14px;
+  transition: all 0.2s ease;
+}
+
+.twin-stat-badge:hover {
+  background: rgba(219, 234, 254, 0.6);
+  border-color: rgba(59, 130, 246, 0.15);
+}
+
+.twin-stat-badge .value {
+  font-size: 17px;
+  font-weight: 800;
+  font-family: 'JetBrains Mono', monospace;
+  line-height: 1;
+}
+
+.twin-stat-badge .label {
+  font-size: 7.5px;
+  color: #64748b;
+  letter-spacing: 1.5px;
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+/* ── DEFCON Badge ────────────────────────────────────────────────────────── */
+.twin-defcon {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(241, 245, 249, 0.95);
+  border-radius: 10px;
+  padding: 6px 16px;
+  transition: all 0.3s ease;
+}
+
+.twin-defcon .defcon-label {
+  font-size: 8px;
+  color: #64748b;
+  letter-spacing: 2px;
+  font-weight: 700;
+}
+
+.twin-defcon .defcon-value {
+  font-size: 26px;
+  font-weight: 900;
+  line-height: 1;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── System Status Badge ─────────────────────────────────────────────────── */
+.twin-status-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+}
+
+.twin-status-badge.nominal {
+  background: rgba(220, 252, 231, 0.9);
+  color: #16a34a;
+  border: 1px solid rgba(22, 163, 74, 0.2);
+}
+
+.twin-status-badge.alert {
+  background: rgba(254, 226, 226, 0.9);
+  color: #dc2626;
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  animation: statusPulse 1.5s ease-in-out infinite;
+}
+
+/* ── Status Banner ───────────────────────────────────────────────────────── */
+.twin-banner {
+  position: absolute;
+  top: 56px;
+  left: 0;
+  right: 0;
+  z-index: 19;
+  padding: 8px 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.twin-banner.running {
+  background: rgba(255, 237, 213, 0.92);
+  border-bottom: 1px solid rgba(249, 115, 22, 0.2);
+  color: #c2410c;
+}
+
+.twin-banner.breach {
+  background: rgba(254, 226, 226, 0.92);
+  border-bottom: 1px solid rgba(220, 38, 38, 0.3);
+  color: #dc2626;
+}
+
+.twin-banner.remediated {
+  background: rgba(220, 252, 231, 0.92);
+  border-bottom: 1px solid rgba(22, 163, 74, 0.2);
+  color: #16a34a;
+}
+
+/* ── Left Sidebar Panel ──────────────────────────────────────────────────── */
+.twin-sidebar-left {
+  position: absolute;
+  top: 64px;
+  left: 12px;
+  bottom: 12px;
+  width: 240px;
+  z-index: 18;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.twin-panel {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 8px 32px rgba(0, 0, 0, 0.02);
+  padding: 14px;
+  transition: all 0.2s ease;
+}
+
+.twin-panel:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06), 0 12px 40px rgba(0, 0, 0, 0.04);
+}
+
+.twin-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.twin-panel-header .icon {
+  font-size: 14px;
+}
+
+.twin-panel-header .title {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: #0f172a;
+  text-transform: uppercase;
+}
+
+/* ── Simulation Control Buttons ──────────────────────────────────────────── */
+.twin-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  border: none;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.twin-btn-run {
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  color: white;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+}
+
+.twin-btn-run:hover {
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.4);
+  transform: translateY(-1px);
+}
+
+.twin-btn-run:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.twin-btn-run.active {
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+}
+
+.twin-btn-reset {
+  background: rgba(241, 245, 249, 0.9);
+  color: #475569;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.twin-btn-reset:hover {
+  background: rgba(226, 232, 240, 0.9);
+}
+
+/* ── Scenario Toggle Buttons ─────────────────────────────────────────────── */
+.twin-scenario-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(241, 245, 249, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 9.5px;
+  font-weight: 600;
+  color: #334155;
+  width: 100%;
+  text-align: left;
+}
+
+.twin-scenario-btn:hover {
+  background: rgba(219, 234, 254, 0.6);
+  border-color: rgba(59, 130, 246, 0.15);
+}
+
+.twin-scenario-btn.selected {
+  background: rgba(219, 234, 254, 0.8);
+  border-color: rgba(59, 130, 246, 0.3);
+  color: #1e40af;
+}
+
+/* ── Right Sidebar — SOC Log ─────────────────────────────────────────────── */
+.twin-sidebar-right {
+  position: absolute;
+  top: 64px;
+  right: 12px;
+  bottom: 12px;
+  width: 280px;
+  z-index: 18;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.twin-log-container {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 0;
+}
+
+.twin-log-line {
+  font-size: 9.5px;
+  font-family: 'JetBrains Mono', monospace;
+  line-height: 1.5;
+  padding: 3px 8px;
+  border-radius: 4px;
+  transition: background 0.15s ease;
+}
+
+.twin-log-line:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.twin-log-line .time {
+  color: #94a3b8;
+  margin-right: 6px;
+}
+
+.twin-log-line.normal {
+  color: #16a34a;
+}
+
+.twin-log-line.alert {
+  color: #d97706;
+  background: rgba(245, 158, 11, 0.05);
+  border-left: 2px solid rgba(245, 158, 11, 0.3);
+}
+
+.twin-log-line.attack {
+  color: #dc2626;
+  background: rgba(239, 68, 68, 0.05);
+  border-left: 2px solid rgba(239, 68, 68, 0.3);
+}
+
+.twin-log-line.breach {
+  color: #dc2626;
+  background: rgba(239, 68, 68, 0.08);
+  border-left: 2px solid rgba(239, 68, 68, 0.5);
+}
+
+.twin-log-line.remediate {
+  color: #16a34a;
+  background: rgba(34, 197, 94, 0.05);
+  border-left: 2px solid rgba(34, 197, 94, 0.3);
+}
+
+/* ── Detail Panel (Slide-in) ─────────────────────────────────────────────── */
+.twin-detail-panel {
+  position: absolute;
+  right: 304px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 300px;
+  z-index: 30;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 20px 60px rgba(0, 0, 0, 0.04);
+  padding: 20px;
+  animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.twin-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  font-size: 11px;
+}
+
+.twin-detail-row .key {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.twin-detail-row .val {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+  text-align: right;
+  max-width: 160px;
+  color: #0f172a;
+}
+
+/* ── Threat Legend ────────────────────────────────────────────────────────── */
+.twin-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.twin-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.twin-legend-label {
+  font-size: 9px;
+  color: #475569;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* ── 3D HTML Labels (rendered inside Three.js Canvas) ────────────────────── */
+.twin-3d-label {
+  pointer-events: none;
+  user-select: none;
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+}
+
+.twin-3d-label .name {
+  font-size: 10px;
+  font-weight: 700;
+  color: #0f172a;
+  text-shadow: 0 1px 3px rgba(255, 255, 255, 0.8);
+  white-space: nowrap;
+  letter-spacing: 0.2px;
+}
+
+.twin-3d-label .ip {
+  font-size: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  color: #64748b;
+  margin-top: 1px;
+}
+
+.twin-3d-label .status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 3px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* ── Zone Labels (floor) ─────────────────────────────────────────────────── */
+.twin-zone-label {
+  pointer-events: none;
+  user-select: none;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  opacity: 0.7;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+/* ── Animations ──────────────────────────────────────────────────────────── */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) translateX(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+}
+
+@keyframes statusPulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes liveDot {
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.5;
+    transform: scale(1.3);
+  }
+}
+
+.live-dot {
+  animation: liveDot 1.5s ease-in-out infinite;
+}
+
+/* ── Scrollbar Styling ───────────────────────────────────────────────────── */
+.twin-sidebar-left::-webkit-scrollbar,
+.twin-log-container::-webkit-scrollbar {
+  width: 3px;
+}
+
+.twin-sidebar-left::-webkit-scrollbar-track,
+.twin-log-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.twin-sidebar-left::-webkit-scrollbar-thumb,
+.twin-log-container::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+/* ── Select Dropdown ─────────────────────────────────────────────────────── */
+.twin-select {
+  width: 100%;
+  background: rgba(241, 245, 249, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: #334155;
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.2s ease;
+}
+
+.twin-select:focus {
+  border-color: rgba(59, 130, 246, 0.3);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.08);
+}

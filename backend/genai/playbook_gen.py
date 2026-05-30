@@ -5,7 +5,7 @@ Gemini-powered remediation playbook generator for Sarathi Cyberdefense.
 
 Design decisions
 ----------------
-- Uses gemini-1.5-pro with deterministic settings (temp=0.2, top_p=0.8).
+- Uses gemini-3.5-flash with deterministic settings (temp=0.2, top_p=0.8).
 - Retry logic: up to 3 attempts with exponential back-off for rate-limit /
   transient errors.  Non-retryable errors fall back immediately.
 - Raw LLM text is always preserved in `rawResponse` for audit purposes.
@@ -32,7 +32,7 @@ from config import settings
 logger = logging.getLogger("sarathi.playbook_gen")
 
 # ── Gemini knobs ───────────────────────────────────────────────────────────────
-_MODEL_NAME       = "gemini-1.5-pro"
+_MODEL_NAME       = "gemini-3.5-flash"
 _TEMPERATURE      = 0.2
 _TOP_P            = 0.8
 _MAX_OUTPUT_TOKENS = 4096
@@ -43,15 +43,12 @@ _RETRY_BASE_SEC = 2.0      # doubles each attempt: 2 → 4 → 8
 
 # ── Section headings expected in the model output ─────────────────────────────
 _SECTIONS = [
-    ("executiveSummary",     ["executive summary"]),
-    ("immediateActions",     ["immediate actions"]),
-    ("shortTermRemediation", ["short-term remediation", "short term remediation"]),
-    ("longTermHardening",    ["long-term hardening",    "long term hardening"]),
-    ("verificationSteps",    ["verification steps"]),
-    ("rollbackPlan",         ["rollback plan"]),
-    ("complianceNotes",      ["compliance notes"]),
+    ("executiveSummary",       ["1. executive summary", "executive summary"]),
+    ("validation",             ["2. validation", "validation: is this real?", "validation: is this real"]),
+    ("containment",            ["3. containment", "containment: stop the threat"]),
+    ("eradicationRemediation", ["4. eradication", "eradication & remediation"]),
+    ("postIncidentHunting",    ["5. post-incident hunting", "post-incident hunting"]),
 ]
-
 
 class PlaybookGenerator:
     """
@@ -101,9 +98,8 @@ class PlaybookGenerator:
         Returns
         -------
         dict with keys:
-            cveId, generatedAt, executiveSummary, immediateActions,
-            shortTermRemediation, longTermHardening, verificationSteps,
-            rollbackPlan, complianceNotes, rawResponse
+            cveId, generatedAt, executiveSummary, validation, containment,
+            eradicationRemediation, postIncidentHunting, rawResponse
         """
         cve_id      = cve_data.get("cveId")      or cve_data.get("cve_id",      "UNKNOWN")
         description = cve_data.get("description", "No description available.")
@@ -114,25 +110,37 @@ class PlaybookGenerator:
         assets_str  = ", ".join(affected_assets) if affected_assets else "Unknown Banking Asset"
 
         prompt = (
-            "You are a senior cybersecurity engineer at a major Indian bank "
-            "(Union Bank of India).\n\n"
-            "Generate a detailed remediation playbook for the following vulnerability:\n\n"
+            f"Act as a pragmatic Senior Incident Response Commander for Union Bank of India.\n"
+            f"Generate a SOC playbook for the following prioritized attack vector:\n\n"
             f"CVE ID: {cve_id}\n"
             f"Description: {description}\n"
             f"CVSS Score: {cvss} ({severity})\n"
             f"EPSS Score: {epss} (probability of exploitation)\n"
             f"Known Exploited: {is_kev}\n"
             f"Affected Banking Assets: {assets_str}\n\n"
-            "Generate a structured playbook with these exact sections:\n\n"
-            "1. EXECUTIVE SUMMARY\n"
-            "2. IMMEDIATE ACTIONS\n"
-            "3. SHORT-TERM REMEDIATION\n"
-            "4. LONG-TERM HARDENING\n"
-            "5. VERIFICATION STEPS\n"
-            "6. ROLLBACK PLAN\n"
-            "7. COMPLIANCE NOTES\n\n"
-            "Be specific to banking infrastructure.\n"
-            "Include actual commands where relevant."
+            "Do not use generic advice. Be specific, realistic, and format the output strictly using the following structure:\n\n"
+            "1. Executive Summary\n"
+            "The Threat: [A simple, one-sentence description of the attack vector].\n"
+            "The Pragmatic Risk: [Why does this actually matter to the business?]\n"
+            "Target Scope: [What types of assets are usually targeted?]\n\n"
+            "2. Validation: Is this real?\n"
+            "Log Sources to Check: [List the exact logs needed]\n"
+            "Key Indicators (IoCs): [What specific event IDs, HTTP status codes, or file paths should the analyst look for?]\n"
+            "Validation Steps:\n"
+            "Step 1: [e.g., Check if the targeted system actually runs the vulnerable software version].\n"
+            "Step 2: [...]\n\n"
+            "3. Containment: Stop the threat\n"
+            "Soft Containment (Low Risk to Production):\n"
+            "- [...]\n"
+            "Hard Containment (High Risk to Production):\n"
+            "- [...]\n"
+            "The \"Legacy/Unpatchable\" Plan: [Compensating controls]\n\n"
+            "4. Eradication & Remediation\n"
+            "Primary Fix: [e.g., Apply patch version X.Y]\n"
+            "Asset Owner Handoff: [What exactly does the SOC analyst need to tell the IT/DevOps team?]\n\n"
+            "5. Post-Incident Hunting\n"
+            "Persistence Checks: [Where would they hide?]\n"
+            "Lateral Movement Checks: [What should the analyst look for to see if the attacker jumped to another machine?]"
         )
 
         raw_text = self._call_gemini_with_retry(prompt, context=f"playbook:{cve_id}")
@@ -144,16 +152,14 @@ class PlaybookGenerator:
         sections = _parse_sections(raw_text, _SECTIONS)
 
         return {
-            "cveId":               cve_id,
-            "generatedAt":         datetime.now(timezone.utc).isoformat(),
-            "executiveSummary":    sections.get("executiveSummary",     ""),
-            "immediateActions":    sections.get("immediateActions",     ""),
-            "shortTermRemediation":sections.get("shortTermRemediation", ""),
-            "longTermHardening":   sections.get("longTermHardening",    ""),
-            "verificationSteps":   sections.get("verificationSteps",    ""),
-            "rollbackPlan":        sections.get("rollbackPlan",         ""),
-            "complianceNotes":     sections.get("complianceNotes",      ""),
-            "rawResponse":         raw_text,
+            "cveId":                  cve_id,
+            "generatedAt":            datetime.now(timezone.utc).isoformat(),
+            "executiveSummary":       sections.get("executiveSummary",       ""),
+            "validation":             sections.get("validation",             ""),
+            "containment":            sections.get("containment",            ""),
+            "eradicationRemediation": sections.get("eradicationRemediation", ""),
+            "postIncidentHunting":    sections.get("postIncidentHunting",    ""),
+            "rawResponse":            raw_text,
         }
 
     # ──────────────────────────────────────────────────────────────────────────
@@ -255,13 +261,30 @@ class PlaybookGenerator:
                 last_exc = exc
                 err_str  = str(exc).lower()
 
-                # Dynamic fallback from gemini-1.5-pro to gemini-3.5-flash if model not found / quota is 0
-                if self.model_name == "gemini-1.5-pro":
+                # Dynamic fallback from gemini-3.5-flash to gemini-3.1-flash-lite / gemini-2.5-flash if model not found / quota is 0
+                if self.model_name == "gemini-3.5-flash":
                     is_404 = "not found" in err_str or "404" in err_str or "unsupported" in err_str
                     is_zero_quota = "limit: 0" in err_str or "quota exceeded" in err_str
                     if is_404 or is_zero_quota:
-                        logger.warning("Model gemini-1.5-pro unavailable/unsupported on this key. Falling back to gemini-3.5-flash dynamically...")
-                        self.model_name = "gemini-3.5-flash"
+                        logger.warning("Model gemini-3.5-flash unavailable/unsupported on this key. Falling back to gemini-3.1-flash-lite dynamically...")
+                        self.model_name = "gemini-3.1-flash-lite"
+                        self._init_model()
+                        try:
+                            logger.info("Retrying call [%s] immediately with fallback model %s …", context, self.model_name)
+                            response = self._model.generate_content(prompt)
+                            text = _sanitize(response.text)
+                            logger.info("Gemini call [%s] succeeded with fallback model %s (%d chars).", context, self.model_name, len(text))
+                            return text
+                        except Exception as inner_exc:
+                            last_exc = inner_exc
+                            err_str = str(inner_exc).lower()
+
+                if self.model_name == "gemini-3.1-flash-lite":
+                    is_404 = "not found" in err_str or "404" in err_str or "unsupported" in err_str
+                    is_zero_quota = "limit: 0" in err_str or "quota exceeded" in err_str
+                    if is_404 or is_zero_quota:
+                        logger.warning("Model gemini-3.1-flash-lite unavailable/unsupported on this key. Falling back to gemini-2.5-flash dynamically...")
+                        self.model_name = "gemini-2.5-flash"
                         self._init_model()
                         try:
                             logger.info("Retrying call [%s] immediately with fallback model %s …", context, self.model_name)
@@ -309,56 +332,33 @@ class PlaybookGenerator:
             "\n> ⚠️ This CVE is in the CISA KEV catalog. Immediate patching is MANDATORY."
             if is_kev else ""
         )
-        return f"""## EXECUTIVE SUMMARY
-{cve_id} ({severity}, CVSS {cvss}) affects {assets}.{kev_note}
-Immediate containment and patching are required per RBI Cyber Security Framework guidelines.
+        return f"""1. Executive Summary
+The Threat: {cve_id} ({severity}, CVSS {cvss}) affects {assets}.{kev_note}
+The Pragmatic Risk: Immediate containment and patching are required per RBI Cyber Security Framework guidelines to prevent unauthorized access and data exfiltration.
+Target Scope: Enterprise banking infrastructure and associated middleware.
 
-## IMMEDIATE ACTIONS
-- Isolate affected systems using network ACLs within 15 minutes of detection.
+2. Validation: Is this real?
+Log Sources to Check: SIEM, WAF logs, and EDR telemetry on {assets}.
+Key Indicators (IoCs): Look for abnormal traffic patterns, rapid sequential authentication failures, or unexpected process spawning.
+Validation Steps:
+Step 1: Verify if {assets} is running the vulnerable software version.
+Step 2: Check for any corresponding alerts from the internal vulnerability scanner.
+
+3. Containment: Stop the threat
+Soft Containment (Low Risk to Production):
 - Revoke all active service-account tokens on {assets}.
 - Enable enhanced audit logging on SIEM for all authentication events.
-- Notify CISO and SOC Lead per IR escalation matrix (P1 incident).
-  ```bash
-  # Isolate host (Linux)
-  sudo iptables -I INPUT -j DROP
-  sudo iptables -I OUTPUT -j DROP
-  ```
+Hard Containment (High Risk to Production):
+- Isolate affected systems using network ACLs within 15 minutes of detection.
+The "Legacy/Unpatchable" Plan: If unpatchable, implement strict zero-trust micro-segmentation and WAF rules to block exploitation patterns.
 
-## SHORT-TERM REMEDIATION
-- Apply vendor security patch for {cve_id} within 72 hours (RBI mandate).
-- Perform authenticated vulnerability scan post-patch to confirm closure.
-- Rotate all secrets, API keys, and certificates associated with {assets}.
-  ```bash
-  # Verify patch level
-  dpkg -l | grep <package> && apt-get changelog <package> | head -20
-  ```
+4. Eradication & Remediation
+Primary Fix: Apply vendor security patch for {cve_id} within 72 hours (RBI mandate).
+Asset Owner Handoff: Provide IT/DevOps with the patching schedule and verify closure with an authenticated vulnerability scan post-patch.
 
-## LONG-TERM HARDENING
-- Implement WAF rule set blocking exploitation patterns for this CVE class.
-- Enforce zero-trust micro-segmentation between {assets} and downstream services.
-- Add {cve_id} to automated patch compliance tracking in vulnerability management platform.
-
-## VERIFICATION STEPS
-- Run Nessus/Qualys authenticated scan targeting {assets}; confirm finding closed.
-- Verify no active sessions from unknown IP ranges in SIEM.
-- Test rollback by replaying detection signature against patched host.
-  ```bash
-  nmap -sV --script vuln -p 443,8080 <asset_ip>
-  ```
-
-## ROLLBACK PLAN
-- Maintain pre-patch VM snapshot for 7 days post-remediation.
-- Rollback trigger: >20% error rate on {assets} post-patch; restore snapshot and re-engage vendor.
-  ```bash
-  # Restore VM snapshot (VMware)
-  vmrun revertToSnapshot <vm_path> <snapshot_name>
-  ```
-
-## COMPLIANCE NOTES
-- **RBI Cyber Security Framework (2016):** Patch within 14 days for critical CVEs; immediate isolation for KEV.
-- **ISO 27001 A.12.6.1:** Technical vulnerability management — document remediation evidence.
-- **DPDP Act 2023:** Report data-breach risk to CERT-In within 6 hours if PII exposure confirmed.
-- **SEBI CSCRF:** Update VAPT register and notify board-level CISO within 24 hours for CRITICAL severity.
+5. Post-Incident Hunting
+Persistence Checks: Check for newly created local admin accounts, scheduled tasks, or web shells on {assets}.
+Lateral Movement Checks: Verify no active sessions from unknown IP ranges in SIEM, and check for east-west traffic anomalies.
 """
 
     def _fallback_policy(self, tech_id: str, tech_name: str, tactic: str) -> str:

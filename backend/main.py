@@ -4,6 +4,7 @@ from datetime import datetime
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from config import settings
 
@@ -43,6 +44,12 @@ app.include_router(routes_redteam.router, prefix="/api")
 
 # Gen-AI Threat Intelligence
 app.include_router(routes_genai.router, prefix="/api")
+
+# Serve 3D GLB models for the Digital Twin frontend
+import os
+_glb_dir = os.path.join(os.path.dirname(__file__), "glb_files")
+if os.path.isdir(_glb_dir):
+    app.mount("/api/models", StaticFiles(directory=_glb_dir), name="3d_models")
 
 
 

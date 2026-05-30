@@ -127,7 +127,7 @@ def main():
 
     banner(f"Sarathi Cyberdefense — GenAI Module Demo  {mode_tag}")
     print(f"\n  GEMINI_API_KEY present : {gemini_on}")
-    print(f"  Model                  : gemini-1.5-pro")
+    print(f"  Model                  : {playbook_engine.model_name}")
     print(f"  Temperature / top_p    : 0.2 / 0.8")
 
     # ══════════════════════════════════════════════════════════════════════════

@@ -54,7 +54,7 @@ _RCA_SECTIONS = [
 class RCAGenerator:
     """
     Generates structured RCA reports and SOC incident response drafts
-    using Gemini 1.5 Pro with deterministic settings.
+    using Gemini 3.5 Flash with deterministic settings.
     """
 
     def __init__(self) -> None:
@@ -235,13 +235,30 @@ class RCAGenerator:
                 last_exc = exc
                 err_str  = str(exc).lower()
 
-                # Dynamic fallback from gemini-1.5-pro to gemini-3.5-flash if model not found / quota is 0
-                if self.model_name == "gemini-1.5-pro":
+                # Dynamic fallback from gemini-3.5-flash to gemini-3.1-flash-lite / gemini-2.5-flash if model not found / quota is 0
+                if self.model_name == "gemini-3.5-flash":
                     is_404 = "not found" in err_str or "404" in err_str or "unsupported" in err_str
                     is_zero_quota = "limit: 0" in err_str or "quota exceeded" in err_str
                     if is_404 or is_zero_quota:
-                        logger.warning("Model gemini-1.5-pro unavailable/unsupported on this key. Falling back to gemini-3.5-flash dynamically...")
-                        self.model_name = "gemini-3.5-flash"
+                        logger.warning("Model gemini-3.5-flash unavailable/unsupported on this key. Falling back to gemini-3.1-flash-lite dynamically...")
+                        self.model_name = "gemini-3.1-flash-lite"
+                        self._init_model()
+                        try:
+                            logger.info("Retrying call [%s] immediately with fallback model %s …", context, self.model_name)
+                            response = self._model.generate_content(prompt)
+                            text = _sanitize(response.text)
+                            logger.info("Gemini call [%s] succeeded with fallback model %s (%d chars).", context, self.model_name, len(text))
+                            return text
+                        except Exception as inner_exc:
+                            last_exc = inner_exc
+                            err_str = str(inner_exc).lower()
+
+                if self.model_name == "gemini-3.1-flash-lite":
+                    is_404 = "not found" in err_str or "404" in err_str or "unsupported" in err_str
+                    is_zero_quota = "limit: 0" in err_str or "quota exceeded" in err_str
+                    if is_404 or is_zero_quota:
+                        logger.warning("Model gemini-3.1-flash-lite unavailable/unsupported on this key. Falling back to gemini-2.5-flash dynamically...")
+                        self.model_name = "gemini-2.5-flash"
                         self._init_model()
                         try:
                             logger.info("Retrying call [%s] immediately with fallback model %s …", context, self.model_name)

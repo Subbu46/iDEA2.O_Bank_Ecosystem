@@ -224,8 +224,8 @@ def get_top_risks(
     summary="Ranked lateral movement paths with risk scoring",
 )
 def get_attack_paths(
-    source: str = Query(default="Asset_1", description="Entry-point asset ID"),
-    target: str = Query(default="Asset_4", description="Target asset ID"),
+    source: str = Query(default="SRV-DMZ-WEB-01", description="Entry-point asset ID (DMZ web server)"),
+    target: str = Query(default="DB-CORE-LEDG-02", description="Target asset ID (Central Production DB)"),
 ):
     """
     Enumerates all simple paths (up to 6 hops) from source to target in the

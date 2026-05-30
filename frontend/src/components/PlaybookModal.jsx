@@ -12,7 +12,7 @@ const SECTIONS = [
     key: 'executiveSummary',
     label: 'Executive Summary',
     icon: FileText,
-    color: 'text-cyan-400',
+    color: 'text-cyan-600 dark:text-cyan-400',
     borderColor: 'border-cyan-500/30',
     bgColor: 'bg-cyan-500/5',
   },
@@ -20,7 +20,7 @@ const SECTIONS = [
     key: 'immediateActions',
     label: 'Immediate Actions',
     icon: Zap,
-    color: 'text-red-400',
+    color: 'text-red-600 dark:text-red-400',
     borderColor: 'border-red-500/30',
     bgColor: 'bg-red-500/5',
   },
@@ -28,7 +28,7 @@ const SECTIONS = [
     key: 'shortTermRemediation',
     label: 'Short-Term Remediation',
     icon: AlertTriangle,
-    color: 'text-amber-400',
+    color: 'text-amber-600 dark:text-amber-400',
     borderColor: 'border-amber-500/30',
     bgColor: 'bg-amber-500/5',
   },
@@ -36,8 +36,8 @@ const SECTIONS = [
     key: 'longTermHardening',
     label: 'Long-Term Hardening',
     icon: ShieldAlert,
-    color: 'text-blue-400',
-    borderColor: 'border-blue-500/30',
+    color: 'text-blue-600 dark:text-blue-400',
+    borderColor: 'border-blue-300 dark:border-blue-500/30',
     bgColor: 'bg-blue-500/5',
   },
   {
@@ -60,8 +60,8 @@ const SECTIONS = [
     key: 'complianceNotes',
     label: 'Compliance Notes',
     icon: Lock,
-    color: 'text-slate-300',
-    borderColor: 'border-slate-600/30',
+    color: 'text-slate-700 dark:text-slate-300',
+    borderColor: 'border-slate-300 dark:border-slate-600/30',
     bgColor: 'bg-slate-700/10',
   },
 ];
@@ -88,7 +88,7 @@ function AccordionSection({ section, content, defaultOpen = false }) {
           <span className={`font-bold text-[15px] ${section.color}`}>{section.label}</span>
         </div>
         <motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.2 }}>
-          <ChevronDown size={18} className="text-slate-400" />
+          <ChevronDown size={18} className="text-slate-500 dark:text-slate-600 dark:text-slate-400" />
         </motion.div>
       </button>
 
@@ -102,11 +102,11 @@ function AccordionSection({ section, content, defaultOpen = false }) {
           >
             <div className="p-5 bg-slate-950/60 border-t border-slate-800/40">
               {content ? (
-                <pre className="text-[13px] text-slate-300 font-mono whitespace-pre-wrap leading-relaxed break-words">
+                <pre className="text-[13px] text-slate-700 dark:text-slate-300 font-mono whitespace-pre-wrap leading-relaxed break-words">
                   {content}
                 </pre>
               ) : (
-                <p className="text-slate-500 italic text-sm">
+                <p className="text-slate-500 dark:text-slate-500 italic text-sm">
                   Section data not available — please retry generation.
                 </p>
               )}
@@ -536,7 +536,7 @@ export default function PlaybookModal({ alert, onClose }) {
           />
 
           {/* Header */}
-          <div className="relative flex items-start justify-between gap-4 p-7 border-b border-slate-800/60 bg-gradient-to-r from-violet-950/30 to-transparent shrink-0">
+          <div className="relative flex items-start justify-between gap-4 p-7 border-b border-slate-200 dark:border-slate-800/60 bg-gradient-to-r from-violet-950/30 to-transparent shrink-0">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3 mb-2">
                 <div className="p-2 rounded-xl bg-violet-500/15 border border-violet-500/30 shadow-[0_0_15px_rgba(139,92,246,0.2)]">
@@ -546,10 +546,10 @@ export default function PlaybookModal({ alert, onClose }) {
                   <span role="img" aria-label="shield">🛡️</span> AI-Generated Remediation Playbook
                 </h2>
               </div>
-              <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm font-mono text-slate-400 mt-1 pl-1">
+              <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm font-mono text-slate-500 dark:text-slate-600 dark:text-slate-400 mt-1 pl-1">
                 <span>
                   Incident:{' '}
-                  <span className="text-slate-200 font-semibold">
+                  <span className="text-slate-800 dark:text-slate-200 font-semibold">
                     {alert?.message?.substring?.(0, 60)}{alert?.message?.length > 60 ? '...' : ''}
                   </span>
                 </span>
@@ -562,7 +562,7 @@ export default function PlaybookModal({ alert, onClose }) {
                 {alert?.asset_id && (
                   <span>
                     Asset:{' '}
-                    <span className="text-cyan-400 font-bold">{alert.asset_id}</span>
+                    <span className="text-cyan-600 dark:text-cyan-400 font-bold">{alert.asset_id}</span>
                   </span>
                 )}
               </div>
@@ -573,7 +573,7 @@ export default function PlaybookModal({ alert, onClose }) {
                 console.log("[PlaybookModal] Closing modal via explicit Close icon click...");
                 onClose();
               }}
-              className="shrink-0 p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-700/60 border border-slate-700/50 text-slate-400 hover:text-slate-200 transition-all duration-150 cursor-pointer"
+              className="shrink-0 p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-700/60 border border-slate-300 dark:border-slate-700/50 text-slate-500 dark:text-slate-600 dark:text-slate-400 hover:text-slate-200 transition-all duration-150 cursor-pointer"
             >
               <X size={20} />
             </button>
@@ -595,12 +595,12 @@ export default function PlaybookModal({ alert, onClose }) {
                     AI Analysing Incident
                     <span className="animate-pulse">...</span>
                   </p>
-                  <p className="text-slate-500 text-sm mt-1 font-mono">
+                  <p className="text-slate-500 dark:text-slate-500 text-sm mt-1 font-mono">
                     Building remediation workflow & mapping MITRE techniques
                   </p>
                 </div>
                 {/* Fake processing logs */}
-                <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono text-xs text-emerald-400 w-full max-w-md">
+                <div className="bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-4 font-mono text-xs text-emerald-400 w-full max-w-md">
                   {[
                     '> AI analysing incident...',
                     '> Mapping MITRE techniques...',
@@ -619,16 +619,16 @@ export default function PlaybookModal({ alert, onClose }) {
                 </div>
               </div>
             ) : error ? (
-              <div className="text-center py-16 text-red-400 font-mono">
+              <div className="text-center py-16 text-red-600 dark:text-red-400 font-mono">
                 <p className="font-bold mb-2">Failed to generate playbook</p>
-                <p className="text-sm text-slate-500">{error}</p>
+                <p className="text-sm text-slate-500 dark:text-slate-500">{error}</p>
               </div>
             ) : !playbook ? (
               null
             ) : (
               <div className="flex flex-col gap-4">
                 {/* Generated timestamp */}
-                <div className="flex items-center gap-2 text-xs font-mono text-slate-500 mb-2">
+                <div className="flex items-center gap-2 text-xs font-mono text-slate-500 dark:text-slate-500 mb-2">
                   <Clock size={12} />
                   <span>Generated: {playbook?.generatedAt ? new Date(playbook.generatedAt).toLocaleString() : 'Just now'}</span>
                   {playbook?.cveId && (
@@ -650,14 +650,14 @@ export default function PlaybookModal({ alert, onClose }) {
                 {/* AI Governance & Human Validation Section */}
                 <div className="mt-8 border-t border-slate-800/80 pt-6">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.15)]">
-                      <Shield className="text-cyan-400" size={20} />
+                    <div className="p-2 rounded-xl bg-cyan-100 dark:bg-cyan-500/10 border border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.15)]">
+                      <Shield className="text-cyan-600 dark:text-cyan-400" size={20} />
                     </div>
                     <div>
                       <h3 className="text-lg font-bold text-white tracking-wide">
                         AI Governance & Human Validation
                       </h3>
-                      <p className="text-xs text-slate-400 mt-0.5 font-sans">
+                      <p className="text-xs text-slate-500 dark:text-slate-600 dark:text-slate-400 mt-0.5 font-sans">
                         Critical banking infrastructure actions require analyst approval before execution.
                       </p>
                     </div>
@@ -674,17 +674,17 @@ export default function PlaybookModal({ alert, onClose }) {
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
                         {/* AI Confidence */}
                         <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-4 flex flex-col justify-between">
-                          <span className="text-[11px] font-mono text-slate-500 uppercase tracking-widest">AI Confidence</span>
+                          <span className="text-[11px] font-mono text-slate-500 dark:text-slate-500 uppercase tracking-widest">AI Confidence</span>
                           <div className="flex items-baseline gap-2 mt-2">
                             <span className={`text-2xl font-black font-mono ${
                               confidenceScore > 90 ? 'text-emerald-400' :
-                              confidenceScore >= 70 ? 'text-amber-400' : 'text-rose-400'
+                              confidenceScore >= 70 ? 'text-amber-600 dark:text-amber-400' : 'text-rose-400'
                             }`}>
                               {confidenceScore}%
                             </span>
                             <span className={`text-[10px] px-2 py-0.5 rounded font-bold font-mono uppercase ${
                               confidenceScore > 90 ? 'bg-emerald-500/10 text-emerald-400' :
-                              confidenceScore >= 70 ? 'bg-amber-500/10 text-amber-400' : 'bg-rose-500/10 text-rose-400'
+                              confidenceScore >= 70 ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400' : 'bg-rose-500/10 text-rose-400'
                             }`}>
                               {confidenceScore > 90 ? 'Optimal' : confidenceScore >= 70 ? 'Moderate' : 'Critical Low'}
                             </span>
@@ -693,11 +693,11 @@ export default function PlaybookModal({ alert, onClose }) {
 
                         {/* Threat Severity */}
                         <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-4 flex flex-col justify-between">
-                          <span className="text-[11px] font-mono text-slate-500 uppercase tracking-widest">Threat Severity</span>
+                          <span className="text-[11px] font-mono text-slate-500 dark:text-slate-500 uppercase tracking-widest">Threat Severity</span>
                           <div className="flex items-baseline gap-2 mt-2">
                             <span className={`text-2xl font-black font-mono ${
-                              alert?.severity === 'CRITICAL' ? 'text-red-400' :
-                              alert?.severity === 'HIGH' ? 'text-amber-400' : 'text-cyan-400'
+                              alert?.severity === 'CRITICAL' ? 'text-red-600 dark:text-red-400' :
+                              alert?.severity === 'HIGH' ? 'text-amber-600 dark:text-amber-400' : 'text-cyan-600 dark:text-cyan-400'
                             }`}>
                               {alert?.severity || 'HIGH'}
                             </span>
@@ -706,8 +706,8 @@ export default function PlaybookModal({ alert, onClose }) {
 
                         {/* Blast Radius */}
                         <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-4 flex flex-col justify-between">
-                          <span className="text-[11px] font-mono text-slate-500 uppercase tracking-widest">Blast Radius</span>
-                          <span className="text-base font-extrabold text-slate-200 mt-2 font-mono truncate">
+                          <span className="text-[11px] font-mono text-slate-500 dark:text-slate-500 uppercase tracking-widest">Blast Radius</span>
+                          <span className="text-base font-extrabold text-slate-800 dark:text-slate-200 mt-2 font-mono truncate">
                             {blastRadius}
                           </span>
                         </div>
@@ -726,7 +726,7 @@ export default function PlaybookModal({ alert, onClose }) {
                             <span>Eligible for autonomous remediation. Human analyst can bypass full validation cycle.</span>
                           </div>
                         ) : (
-                          <div className="flex items-center gap-2.5 p-3 bg-slate-800/40 border border-slate-700/30 text-slate-350 rounded-lg text-xs font-mono">
+                          <div className="flex items-center gap-2.5 p-3 bg-slate-800/40 border border-slate-300 dark:border-slate-700/30 text-slate-350 rounded-lg text-xs font-mono">
                             <span className="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
                             <span>Standard manual analyst governance validation required.</span>
                           </div>
@@ -737,12 +737,12 @@ export default function PlaybookModal({ alert, onClose }) {
                       {(alert?.severity === 'HIGH' || alert?.severity === 'CRITICAL') && (
                         <div className="relative overflow-hidden mb-6 p-4 rounded-xl border border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-transparent shadow-[0_0_20px_rgba(245,158,11,0.05)] animate-pulse">
                           <div className="flex items-center gap-3">
-                            <AlertOctagon className="text-amber-400 shrink-0" size={24} />
+                            <AlertOctagon className="text-amber-600 dark:text-amber-400 shrink-0" size={24} />
                             <div>
                               <h4 className="text-sm font-black text-amber-300 uppercase tracking-widest font-mono">
                                 ⚠ HUMAN APPROVAL REQUIRED
                               </h4>
-                              <p className="text-xs text-slate-400 mt-0.5 font-sans">
+                              <p className="text-xs text-slate-500 dark:text-slate-600 dark:text-slate-400 mt-0.5 font-sans">
                                 AI-generated remediation affects critical infrastructure.
                               </p>
                             </div>
@@ -757,7 +757,7 @@ export default function PlaybookModal({ alert, onClose }) {
                           disabled={isGovernanceLoading}
                           className={`flex-1 py-4 px-6 rounded-xl text-sm font-bold uppercase tracking-wider transition-all duration-200 flex items-center justify-center gap-2 border shadow-[0_0_15px_rgba(16,185,129,0.05)] ${
                             isGovernanceLoading 
-                              ? 'bg-slate-900 border-slate-800 text-slate-500 cursor-not-allowed'
+                              ? 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-500 cursor-not-allowed'
                               : 'bg-emerald-500/10 hover:bg-emerald-500/25 border-emerald-500/40 hover:border-emerald-500 text-emerald-400 hover:text-emerald-300 active:scale-98 cursor-pointer'
                           }`}
                         >
@@ -767,17 +767,17 @@ export default function PlaybookModal({ alert, onClose }) {
                         <button
                           onClick={handleEscalate}
                           disabled={isGovernanceLoading}
-                          className="flex-1 py-4 px-6 rounded-xl text-sm font-bold uppercase tracking-wider transition-all duration-200 flex items-center justify-center gap-2 border bg-amber-500/10 hover:bg-amber-500/25 border-amber-500/40 hover:border-amber-500 text-amber-400 hover:text-amber-300 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                          className="flex-1 py-4 px-6 rounded-xl text-sm font-bold uppercase tracking-wider transition-all duration-200 flex items-center justify-center gap-2 border bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-500/25 border-amber-300 dark:border-amber-500/40 hover:border-amber-500 text-amber-600 dark:text-amber-400 hover:text-amber-300 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                         >
-                          {isGovernanceLoading && governanceState === "escalating" && <RefreshCw size={16} className="animate-spin text-amber-400 mr-1" />}
+                          {isGovernanceLoading && governanceState === "escalating" && <RefreshCw size={16} className="animate-spin text-amber-600 dark:text-amber-400 mr-1" />}
                           ESCALATE TO SOC ANALYST
                         </button>
                         <button
                           onClick={handleReject}
                           disabled={isGovernanceLoading}
-                          className="flex-1 py-4 px-6 rounded-xl text-sm font-bold uppercase tracking-wider transition-all duration-200 flex items-center justify-center gap-2 border bg-red-500/10 hover:bg-red-500/25 border-red-500/40 hover:border-red-500 text-red-400 hover:text-red-300 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                          className="flex-1 py-4 px-6 rounded-xl text-sm font-bold uppercase tracking-wider transition-all duration-200 flex items-center justify-center gap-2 border bg-red-500/10 hover:bg-red-500/25 border-red-500/40 hover:border-red-500 text-red-600 dark:text-red-400 hover:text-red-300 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                         >
-                          {isGovernanceLoading && governanceState === "rejecting" && <RefreshCw size={16} className="animate-spin text-red-400 mr-1" />}
+                          {isGovernanceLoading && governanceState === "rejecting" && <RefreshCw size={16} className="animate-spin text-red-600 dark:text-red-400 mr-1" />}
                           REJECT ACTION
                         </button>
                       </div>
@@ -801,29 +801,29 @@ export default function PlaybookModal({ alert, onClose }) {
                             <h4 className="text-lg font-black text-emerald-400 tracking-wide font-mono uppercase">
                               ✓ REMEDIATION EXECUTED SUCCESSFULLY
                             </h4>
-                            <span className="text-[10px] text-slate-500 font-mono">SESSION_ID: SOC-SECURE-{alert?.id}</span>
+                            <span className="text-[10px] text-slate-500 dark:text-slate-500 font-mono">SESSION_ID: SOC-SECURE-{alert?.id}</span>
                           </div>
-                          <p className="text-xs text-slate-400 mt-1 font-sans">
+                          <p className="text-xs text-slate-500 dark:text-slate-600 dark:text-slate-400 mt-1 font-sans">
                             Human approval logged. AI containment steps deployed in real-time.
                           </p>
 
                           {/* Containment Summary */}
                           <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono">
                             <div className="bg-slate-950/60 border border-slate-900 p-3 rounded-lg">
-                              <span className="text-slate-500 block mb-1">Containment Actions</span>
+                              <span className="text-slate-500 dark:text-slate-500 block mb-1">Containment Actions</span>
                               <span className="text-emerald-400 font-bold">5 critical actions completed</span>
                             </div>
                             <div className="bg-slate-950/60 border border-slate-900 p-3 rounded-lg">
-                              <span className="text-slate-500 block mb-1">Target Asset Status</span>
+                              <span className="text-slate-500 dark:text-slate-500 block mb-1">Target Asset Status</span>
                               <span className="text-emerald-400 font-bold">Isolated & Secured</span>
                             </div>
                           </div>
 
                           {/* Remediation Execution Logs */}
-                          <div className="mt-4 bg-[#030712] border border-slate-800 rounded-xl p-4 font-mono text-[11px] leading-relaxed flex flex-col gap-2.5 max-h-[160px] overflow-y-auto [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-slate-800">
+                          <div className="mt-4 bg-[#030712] border border-slate-200 dark:border-slate-800 rounded-xl p-4 font-mono text-[11px] leading-relaxed flex flex-col gap-2.5 max-h-[160px] overflow-y-auto [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-slate-800">
                             <div className="flex items-center justify-between border-b border-slate-900 pb-2 mb-1">
-                              <span className="text-[10px] text-slate-500 font-bold">CONTAINMENT STREAM LOGS</span>
-                              <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold uppercase ${executionFinished ? 'text-emerald-400 bg-emerald-500/10' : 'text-cyan-400 bg-cyan-500/10 animate-pulse'}`}>
+                              <span className="text-[10px] text-slate-500 dark:text-slate-500 font-bold">CONTAINMENT STREAM LOGS</span>
+                              <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold uppercase ${executionFinished ? 'text-emerald-400 bg-emerald-500/10' : 'text-cyan-600 dark:text-cyan-400 bg-cyan-100 dark:bg-cyan-500/10 animate-pulse'}`}>
                                 {executionFinished ? 'COMPLETED' : 'ACTIVE'}
                               </span>
                             </div>
@@ -832,7 +832,7 @@ export default function PlaybookModal({ alert, onClose }) {
                               const isExec = log?.startsWith?.('[EXEC]');
                               let styleClass = 'text-slate-350';
                               if (isSuccess) styleClass = 'text-emerald-400 font-bold';
-                              else if (isExec) styleClass = 'text-cyan-400';
+                              else if (isExec) styleClass = 'text-cyan-600 dark:text-cyan-400';
                               return (
                                 <motion.div
                                   initial={{ opacity: 0, x: -5 }}
@@ -848,13 +848,13 @@ export default function PlaybookModal({ alert, onClose }) {
                             {!executionFinished && (
                               <div className="flex items-center gap-1.5 text-cyan-500 mt-1">
                                 <span className="animate-pulse">_</span>
-                                <RefreshCw size={10} className="animate-spin text-cyan-400" />
+                                <RefreshCw size={10} className="animate-spin text-cyan-600 dark:text-cyan-400" />
                               </div>
                             )}
                           </div>
 
                           {/* Audit Confirmation */}
-                          <div className="mt-4 p-3 bg-slate-950/60 rounded-lg border border-slate-900/60 text-[10px] font-mono text-slate-500 flex items-center justify-between">
+                          <div className="mt-4 p-3 bg-slate-950/60 rounded-lg border border-slate-900/60 text-[10px] font-mono text-slate-500 dark:text-slate-500 flex items-center justify-between">
                             <span className="flex items-center gap-1.5 text-emerald-400 font-bold">
                               <Lock size={12} />
                               AUDIT SECURED: ACTION SIGNED & COMPLETED
@@ -875,55 +875,55 @@ export default function PlaybookModal({ alert, onClose }) {
                       className="bg-amber-950/20 border border-amber-500/30 rounded-2xl p-6 mb-6 shadow-[0_0_30px_rgba(245,158,11,0.1)]"
                     >
                       <div className="flex items-start gap-4">
-                        <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 shrink-0 animate-pulse">
+                        <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 shrink-0 animate-pulse">
                           <UserCheck size={28} />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between">
-                            <h4 className="text-lg font-black text-amber-400 tracking-wide font-mono uppercase">
+                            <h4 className="text-lg font-black text-amber-600 dark:text-amber-400 tracking-wide font-mono uppercase">
                               ⚠ ESCALATED TO SOC ANALYST
                             </h4>
-                            <span className="text-[10px] text-slate-500 font-mono">TICKET_ID: {escalationTicket?.ticketId || 'SOC-2026-1043'}</span>
+                            <span className="text-[10px] text-slate-500 dark:text-slate-500 font-mono">TICKET_ID: {escalationTicket?.ticketId || 'SOC-2026-1043'}</span>
                           </div>
-                          <p className="text-xs text-slate-400 mt-1 font-sans">
+                          <p className="text-xs text-slate-500 dark:text-slate-600 dark:text-slate-400 mt-1 font-sans">
                             AI containment bypassed. Critical threat transferred to Tier-3 incident response.
                           </p>
 
                           {/* Ticket Details */}
-                          <div className="mt-4 bg-slate-950/60 border border-slate-900 p-4 rounded-xl font-mono text-xs text-slate-300 flex flex-col gap-3">
+                          <div className="mt-4 bg-slate-950/60 border border-slate-900 p-4 rounded-xl font-mono text-xs text-slate-700 dark:text-slate-300 flex flex-col gap-3">
                             <div className="flex justify-between">
-                              <span className="text-slate-500">Ticket ID:</span>
-                              <span className="text-amber-400 font-bold">{escalationTicket?.ticketId || 'SOC-2026-1043'}</span>
+                              <span className="text-slate-500 dark:text-slate-500">Ticket ID:</span>
+                              <span className="text-amber-600 dark:text-amber-400 font-bold">{escalationTicket?.ticketId || 'SOC-2026-1043'}</span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-slate-500">Assigned Team:</span>
-                              <span className="text-slate-200">{escalationTicket?.assignedTeam || 'Tier-3 IR Team'}</span>
+                              <span className="text-slate-500 dark:text-slate-500">Assigned Team:</span>
+                              <span className="text-slate-800 dark:text-slate-200">{escalationTicket?.assignedTeam || 'Tier-3 IR Team'}</span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-slate-500">Escalation Reason:</span>
-                              <span className="text-slate-200 text-right truncate max-w-[250px]" title={escalationTicket?.reason}>
+                              <span className="text-slate-500 dark:text-slate-500">Escalation Reason:</span>
+                              <span className="text-slate-800 dark:text-slate-200 text-right truncate max-w-[250px]" title={escalationTicket?.reason}>
                                 {escalationTicket?.reason || 'AI confidence below threshold.'}
                               </span>
                             </div>
                             <div className="flex justify-between border-t border-slate-900/60 pt-3">
-                              <span className="text-slate-500">SLA Response Window:</span>
-                              <span className="text-red-400 font-bold animate-pulse">
+                              <span className="text-slate-500 dark:text-slate-500">SLA Response Window:</span>
+                              <span className="text-red-600 dark:text-red-400 font-bold animate-pulse">
                                 {formatSlaTime(slaSeconds)}
                               </span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-slate-500">Timestamp:</span>
+                              <span className="text-slate-500 dark:text-slate-500">Timestamp:</span>
                               <span className="text-slate-450">{escalationTicket?.timestamp ? new Date(escalationTicket.timestamp).toLocaleString() : new Date().toLocaleString()}</span>
                             </div>
                           </div>
 
-                          <div className="mt-4 flex items-center gap-2 p-3 bg-amber-500/5 border border-amber-500/10 text-amber-400 rounded-lg text-xs font-mono text-center w-full justify-center">
+                          <div className="mt-4 flex items-center gap-2 p-3 bg-amber-500/5 border border-amber-500/10 text-amber-600 dark:text-amber-400 rounded-lg text-xs font-mono text-center w-full justify-center">
                             <span className="animate-pulse">● Awaiting manual Tier-3 analyst intervention...</span>
                           </div>
 
                           {/* Audit Confirmation */}
-                          <div className="mt-4 p-3 bg-slate-950/60 rounded-lg border border-slate-900/60 text-[10px] font-mono text-slate-500 flex items-center justify-between">
-                            <span className="flex items-center gap-1.5 text-amber-400 font-bold">
+                          <div className="mt-4 p-3 bg-slate-950/60 rounded-lg border border-slate-900/60 text-[10px] font-mono text-slate-500 dark:text-slate-500 flex items-center justify-between">
+                            <span className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 font-bold">
                               <Lock size={12} />
                               AUDIT SECURED: ESCALATION TICKET REGISTERED
                             </span>
@@ -943,34 +943,34 @@ export default function PlaybookModal({ alert, onClose }) {
                       className="bg-red-950/20 border border-red-500/30 rounded-2xl p-6 mb-6 shadow-[0_0_30px_rgba(239,68,68,0.1)]"
                     >
                       <div className="flex items-start gap-4">
-                        <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 shrink-0">
+                        <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 shrink-0">
                           <AlertOctagon size={28} className="animate-pulse" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between">
-                            <h4 className="text-lg font-black text-red-400 tracking-wide font-mono uppercase">
+                            <h4 className="text-lg font-black text-red-600 dark:text-red-400 tracking-wide font-mono uppercase">
                               ✗ AI REMEDIATION REJECTED
                             </h4>
-                            <span className="text-[10px] text-slate-500 font-mono">AUDIT_LOG: DISMISSED</span>
+                            <span className="text-[10px] text-slate-500 dark:text-slate-500 font-mono">AUDIT_LOG: DISMISSED</span>
                           </div>
-                          <p className="text-xs text-slate-400 mt-1 font-sans">
+                          <p className="text-xs text-slate-500 dark:text-slate-600 dark:text-slate-400 mt-1 font-sans">
                             Operator has declined the recommendation. AI automated actions halted.
                           </p>
 
                           {/* Threat Active Warning */}
-                          <div className="mt-4 p-4 bg-red-950/15 border border-red-500/20 text-red-400 rounded-xl text-xs font-mono flex flex-col gap-2">
+                          <div className="mt-4 p-4 bg-red-950/15 border border-red-500/20 text-red-600 dark:text-red-400 rounded-xl text-xs font-mono flex flex-col gap-2">
                             <div className="flex items-center gap-2 font-bold text-red-300">
                               <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
                               WARNING: THREAT REMAINS ACTIVE
                             </div>
-                            <p className="text-slate-400 leading-relaxed text-[11px] font-sans">
-                              Target asset <span className="text-cyan-400 font-bold">{alert?.asset_id || 'Unknown Asset'}</span> remains in a high-vulnerability exposure state. Manual investigation and physical containment are critically required to prevent lateral movement.
+                            <p className="text-slate-500 dark:text-slate-600 dark:text-slate-400 leading-relaxed text-[11px] font-sans">
+                              Target asset <span className="text-cyan-600 dark:text-cyan-400 font-bold">{alert?.asset_id || 'Unknown Asset'}</span> remains in a high-vulnerability exposure state. Manual investigation and physical containment are critically required to prevent lateral movement.
                             </p>
                           </div>
 
                           {/* Audit Confirmation */}
-                          <div className="mt-4 p-3 bg-slate-950/60 rounded-lg border border-slate-900/60 text-[10px] font-mono text-slate-500 flex items-center justify-between">
-                            <span className="flex items-center gap-1.5 text-red-400 font-bold">
+                          <div className="mt-4 p-3 bg-slate-950/60 rounded-lg border border-slate-900/60 text-[10px] font-mono text-slate-500 dark:text-slate-500 flex items-center justify-between">
+                            <span className="flex items-center gap-1.5 text-red-600 dark:text-red-400 font-bold">
                               <Lock size={12} />
                               AUDIT SECURED: REJECTION IMMUTABLY RECORDED
                             </span>
@@ -983,8 +983,8 @@ export default function PlaybookModal({ alert, onClose }) {
 
                   {/* Audit Trail Monospace Panel */}
                   <div className="bg-[#030712] border border-slate-800/80 rounded-xl overflow-hidden shadow-2xl mt-4">
-                    <div className="px-4 py-3 bg-slate-950/60 border-b border-slate-800/60 flex items-center justify-between">
-                      <span className="text-[11px] font-mono font-bold text-slate-500 tracking-wider uppercase">Enterprise Audit Trail</span>
+                    <div className="px-4 py-3 bg-slate-950/60 border-b border-slate-200 dark:border-slate-800/60 flex items-center justify-between">
+                      <span className="text-[11px] font-mono font-bold text-slate-500 dark:text-slate-500 tracking-wider uppercase">Enterprise Audit Trail</span>
                       <div className="flex items-center gap-1">
                         <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse" />
                         <span className="text-[10px] font-mono text-cyan-500 uppercase">Live Log Feed</span>
@@ -992,28 +992,28 @@ export default function PlaybookModal({ alert, onClose }) {
                     </div>
                     <div className="p-4 max-h-[160px] overflow-y-auto font-mono text-[11px] leading-relaxed flex flex-col gap-2.5 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-slate-800">
                       {auditLogs?.map?.((log, index) => {
-                        let logColor = 'text-slate-400';
-                        let badgeBg = 'bg-slate-800 text-slate-400';
+                        let logColor = 'text-slate-500 dark:text-slate-600 dark:text-slate-400';
+                        let badgeBg = 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-600 dark:text-slate-400';
                         if (log?.status === 'SUCCESS' || log?.status === 'APPROVED') {
                           logColor = 'text-emerald-300';
                           badgeBg = 'bg-emerald-500/10 text-emerald-400';
                         } else if (log?.status === 'WARNING') {
                           logColor = 'text-amber-300';
-                          badgeBg = 'bg-amber-500/10 text-amber-400';
+                          badgeBg = 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400';
                         } else if (log?.status === 'REJECTED') {
                           logColor = 'text-red-300';
-                          badgeBg = 'bg-red-500/10 text-red-400';
+                          badgeBg = 'bg-red-500/10 text-red-600 dark:text-red-400';
                         } else if (log?.status === 'INFO') {
-                          logColor = 'text-cyan-300';
-                          badgeBg = 'bg-cyan-500/10 text-cyan-400';
+                          logColor = 'text-cyan-700 dark:text-cyan-300';
+                          badgeBg = 'bg-cyan-100 dark:bg-cyan-500/10 text-cyan-600 dark:text-cyan-400';
                         }
                         return (
                           <div key={index} className="border-b border-slate-900 pb-2 last:border-b-0 last:pb-0 flex items-start gap-3">
-                            <span className="text-slate-600 shrink-0">[{log?.timestamp ? log.timestamp.substring(11, 19) : '00:00:00'}]</span>
+                            <span className="text-slate-500 dark:text-slate-600 shrink-0">[{log?.timestamp ? log.timestamp.substring(11, 19) : '00:00:00'}]</span>
                             <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase shrink-0 ${badgeBg}`}>{log?.status}</span>
                             <div className="flex-1">
-                              <span className="text-slate-200 font-bold mr-1">{log?.event}</span>
-                              <span className="text-slate-500">by {log?.actor}:</span>
+                              <span className="text-slate-800 dark:text-slate-200 font-bold mr-1">{log?.event}</span>
+                              <span className="text-slate-500 dark:text-slate-500">by {log?.actor}:</span>
                               <span className={`block mt-0.5 ${logColor}`}>{log?.details}</span>
                             </div>
                           </div>
@@ -1028,14 +1028,14 @@ export default function PlaybookModal({ alert, onClose }) {
 
           {/* Footer */}
           {!loading && (
-            <div className="flex items-center justify-between gap-4 p-6 border-t border-slate-800/60 bg-slate-950/40 shrink-0">
-              <div className="text-xs font-mono text-slate-600">
+            <div className="flex items-center justify-between gap-4 p-6 border-t border-slate-200 dark:border-slate-800/60 bg-slate-950/40 shrink-0">
+              <div className="text-xs font-mono text-slate-500 dark:text-slate-600">
                 CyberDefense AI · Gemini-powered · Banking Context
               </div>
               <div className="flex items-center gap-3">
                 <button
                   onClick={handleDownload}
-                  className="px-4 py-2.5 bg-slate-800/70 hover:bg-slate-700/70 border border-slate-700/50 hover:border-slate-600 text-slate-300 rounded-xl transition-all text-sm font-bold flex items-center gap-2 cursor-pointer font-mono"
+                  className="px-4 py-2.5 bg-slate-800/70 hover:bg-slate-700/70 border border-slate-300 dark:border-slate-700/50 hover:border-slate-600 text-slate-700 dark:text-slate-300 rounded-xl transition-all text-sm font-bold flex items-center gap-2 cursor-pointer font-mono"
                 >
                   <Download size={15} />
                   Download
@@ -1045,7 +1045,7 @@ export default function PlaybookModal({ alert, onClose }) {
                   className={`px-4 py-2.5 border rounded-xl transition-all text-sm font-bold flex items-center gap-2 cursor-pointer font-mono ${
                     copied
                       ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400'
-                      : 'bg-slate-800/70 hover:bg-slate-700/70 border-slate-700/50 hover:border-slate-600 text-slate-300'
+                      : 'bg-slate-800/70 hover:bg-slate-700/70 border-slate-300 dark:border-slate-700/50 hover:border-slate-600 text-slate-700 dark:text-slate-300'
                   }`}
                 >
                   {copied ? <Check size={15} /> : <Copy size={15} />}

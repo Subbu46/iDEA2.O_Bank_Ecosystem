@@ -14,50 +14,51 @@ class RedTeamSimulator:
         self.scenarios = {
             "lateral_movement": {
                 "scenarioId": "lateral_movement",
-                "name": "DMZ to Core Banking Lateral Movement",
-                "description": "Attacker moves from DMZ to core banking systems.",
-                "mitreTactics": ["TA0008", "TA0004"], # Lateral Movement, Privilege Escalation
-                "targetAsset": "Asset_4",
-                "attackerStartPoint": "Asset_1",
+                "name": "DMZ Web Server to Central Ledger DB — Lateral Movement",
+                "description": "Attacker exploits CVE-2023-25690 on the internet banking web server, pivots through the ESB via Log4Shell, and laterally moves to the Central Production Database.",
+                "mitreTactics": ["TA0008", "TA0004"],  # Lateral Movement, Privilege Escalation
+                "targetAsset": "DB-CORE-LEDG-02",
+                "attackerStartPoint": "SRV-DMZ-WEB-01",
                 "difficulty": "HIGH"
             },
             "credential_stuffing": {
                 "scenarioId": "credential_stuffing",
-                "name": "IAM Infrastructure Credential Stuffing",
-                "description": "Brute-force attack against IAM infrastructure.",
-                "mitreTactics": ["TA0006", "TA0008"], # Credential Access, Lateral Movement
-                "targetAsset": "Asset_2",
-                "attackerStartPoint": "Asset_1",
+                "name": "Keycloak IAM Credential Stuffing & Session Hijack",
+                "description": "Mass credential stuffing via the Mobile Banking API Gateway exploiting CVE-2022-41915, pivoting to bypass Keycloak IAM (CVE-2022-37434) and forge operator session tokens.",
+                "mitreTactics": ["TA0006", "TA0008"],  # Credential Access, Lateral Movement
+                "targetAsset": "SRV-MID-IAM-02",
+                "attackerStartPoint": "SRV-DMZ-WEB-01",
                 "difficulty": "LOW"
             },
             "swift_fraud": {
                 "scenarioId": "swift_fraud",
-                "name": "SWIFT Gateway Compromise",
-                "description": "Compromise targeting SWIFT gateway.",
-                "mitreTactics": ["TA0040", "TA0003"], # Impact, Persistence
-                "targetAsset": "Asset_5",
-                "attackerStartPoint": "Asset_3",
+                "name": "SWIFT Transaction Appliance Compromise",
+                "description": "Attacker enters via API Gateway, escalates through the Payment Switch, reaches the Jump Server, and compromises the SWIFT Transaction Appliance to inject fraudulent MT103 messages.",
+                "mitreTactics": ["TA0040", "TA0003"],  # Impact, Persistence
+                "targetAsset": "SRV-CORE-SWIFT-03",
+                "attackerStartPoint": "SRV-DMZ-GW-02",
                 "difficulty": "CRITICAL"
             },
             "ransomware_spread": {
                 "scenarioId": "ransomware_spread",
-                "name": "Network-Wide Ransomware Propagation",
-                "description": "Ransomware propagation across banking network.",
-                "mitreTactics": ["TA0040", "TA0011"], # Impact, Command and Control
-                "targetAsset": "Asset_4", # Used as the final target in the path calculation
-                "attackerStartPoint": "Asset_3",
+                "name": "Network-Wide Ransomware Propagation via Log4Shell",
+                "description": "Ransomware payload delivered via Log4Shell (CVE-2021-44228) on the Enterprise Service Bus propagates laterally through CBS to encrypt the Central Production Database.",
+                "mitreTactics": ["TA0040", "TA0011"],  # Impact, Command and Control
+                "targetAsset": "DB-CORE-LEDG-02",
+                "attackerStartPoint": "SRV-MID-ESB-01",
                 "difficulty": "MEDIUM"
             },
             "insider_threat": {
                 "scenarioId": "insider_threat",
-                "name": "Privileged Insider Abuse",
-                "description": "Privileged user abusing access to sensitive systems.",
-                "mitreTactics": ["TA0004", "TA0005"], # Privilege Escalation, Defense Evasion
-                "targetAsset": "Asset_4",
-                "attackerStartPoint": "Asset_2",
+                "name": "Privileged Insider Abuse via Bastion Host",
+                "description": "A compromised or malicious admin abuses the Jump Server (Bastion Host) to access the CBS App Server and exfiltrate bulk account data from the Central Production Database.",
+                "mitreTactics": ["TA0004", "TA0005"],  # Privilege Escalation, Defense Evasion
+                "targetAsset": "DB-CORE-LEDG-02",
+                "attackerStartPoint": "SRV-MGMT-JUMP-02",
                 "difficulty": "HIGH"
             }
         }
+
 
     def get_all_scenarios(self) -> Dict[str, Any]:
         """Returns all detailed scenarios."""

@@ -67,8 +67,8 @@ class AttackPathAnalyzer:
     def find_attack_paths(
         self,
         neo4j_client,
-        source: str = "Asset_1",
-        target: str = "Asset_4",
+        source: str = "SRV-DMZ-WEB-01",
+        target: str = "DB-CORE-LEDG-02",
     ) -> list[dict[str, Any]]:
         """
         Find and score the top-N lateral attack paths from `source` to `target`.
@@ -169,8 +169,8 @@ class AttackPathAnalyzer:
 
         rows = neo4j_client.run_query(query, {"min_crit": min_criticality})
 
-        if not rows:
-            logger.warning("get_critical_assets: no results, using mock fallback.")
+        if getattr(neo4j_client, "mock_mode", False) or not rows:
+            logger.warning("get_critical_assets: using mock fallback.")
             rows = self._mock_critical_assets_rows(min_criticality)
 
         risks = self._get_asset_risks(neo4j_client)
@@ -271,7 +271,7 @@ class AttackPathAnalyzer:
         )
 
         # Mock fallback
-        if not node_rows:
+        if getattr(neo4j_client, "mock_mode", False) or not node_rows:
             node_rows, edge_rows = self._mock_topology()
 
         self._topo_cache = {"nodes": node_rows, "edges": edge_rows}
@@ -301,7 +301,7 @@ class AttackPathAnalyzer:
 
         risk_map: dict[str, dict] = {}
 
-        if rows:
+        if not getattr(neo4j_client, "mock_mode", False) and rows:
             from ml.risk_scorer import RiskScorer
             scorer = RiskScorer()
 
@@ -487,30 +487,69 @@ class AttackPathAnalyzer:
     # ──────────────────────────────────────────────────────────────────────────
 
     def _mock_topology(self) -> tuple[list, list]:
+        """12-node banking topology fallback for mock / offline mode."""
         nodes = [
-            {"id": "Asset_1", "name": "Web Application Gateway", "type": "Gateway",      "criticality": 10, "exposure": "Public"},
-            {"id": "Asset_2", "name": "Authentication Service",  "type": "Microservice", "criticality":  9, "exposure": "Internal"},
-            {"id": "Asset_3", "name": "Admin Dashboard",         "type": "WebApp",       "criticality":  8, "exposure": "Internal"},
-            {"id": "Asset_4", "name": "Core Database Cluster",   "type": "Database",     "criticality": 10, "exposure": "Private"},
-            {"id": "Asset_5", "name": "Edge Firewall Router",    "type": "NetworkDevice","criticality":  9, "exposure": "Public"},
+            # DMZ Zone
+            {"id": "SRV-DMZ-WEB-01",  "name": "Retail Internet Banking Web Server", "type": "Gateway",       "criticality":  8, "exposure": "Public"},
+            {"id": "SRV-DMZ-GW-02",   "name": "Mobile Banking API Gateway",         "type": "Gateway",       "criticality":  8, "exposure": "Public"},
+            {"id": "SRV-DMZ-CMS-03",  "name": "Public CMS Portal",                  "type": "WebApp",        "criticality":  5, "exposure": "Public"},
+            # Middleware Zone
+            {"id": "SRV-MID-ESB-01",  "name": "Enterprise Service Bus",             "type": "Middleware",    "criticality":  8, "exposure": "Internal"},
+            {"id": "SRV-MID-IAM-02",  "name": "Customer Identity & Access Manager", "type": "IAM",           "criticality": 10, "exposure": "Internal"},
+            {"id": "SRV-MID-SWI-03",  "name": "Universal Payment Switch",           "type": "PaymentSwitch", "criticality": 10, "exposure": "Internal"},
+            # Core Zone
+            {"id": "SRV-CORE-CBS-01", "name": "Core Banking System App Server",     "type": "AppServer",     "criticality": 10, "exposure": "Private"},
+            {"id": "DB-CORE-LEDG-02", "name": "Central Production Database",        "type": "Database",      "criticality": 10, "exposure": "Private"},
+            {"id": "SRV-CORE-SWIFT-03","name": "SWIFT Transaction Appliance",       "type": "SWIFT",         "criticality": 10, "exposure": "Private"},
+            # Management Zone
+            {"id": "SRV-MGMT-AD-01",  "name": "Active Directory Domain Controller", "type": "AD",            "criticality": 10, "exposure": "Internal"},
+            {"id": "SRV-MGMT-JUMP-02","name": "Enterprise Jump Server / Bastion",   "type": "Bastion",       "criticality":  8, "exposure": "Internal"},
+            {"id": "SRV-MGMT-SIEM-03","name": "SIEM & Log Aggregator Node",         "type": "SIEM",          "criticality":  8, "exposure": "Internal"},
         ]
         edges = [
-            {"from_id": "Asset_1", "to_id": "Asset_2", "from_crit": 10},
-            {"from_id": "Asset_1", "to_id": "Asset_5", "from_crit": 10},
-            {"from_id": "Asset_2", "to_id": "Asset_4", "from_crit":  9},
-            {"from_id": "Asset_3", "to_id": "Asset_4", "from_crit":  8},
-            {"from_id": "Asset_5", "to_id": "Asset_1", "from_crit":  9},
+            # DMZ → Middleware
+            {"from_id": "SRV-DMZ-WEB-01",   "to_id": "SRV-MID-IAM-02",    "from_crit":  8},
+            {"from_id": "SRV-DMZ-WEB-01",   "to_id": "SRV-DMZ-GW-02",     "from_crit":  8},
+            {"from_id": "SRV-DMZ-GW-02",    "to_id": "SRV-MID-SWI-03",    "from_crit":  8},
+            {"from_id": "SRV-DMZ-GW-02",    "to_id": "SRV-MID-ESB-01",    "from_crit":  8},
+            # Middleware → Core
+            {"from_id": "SRV-MID-ESB-01",   "to_id": "SRV-CORE-CBS-01",   "from_crit":  8},
+            {"from_id": "SRV-MID-ESB-01",   "to_id": "DB-CORE-LEDG-02",   "from_crit":  8},
+            {"from_id": "SRV-MID-IAM-02",   "to_id": "SRV-MGMT-SIEM-03", "from_crit": 10},
+            {"from_id": "SRV-MID-SWI-03",   "to_id": "DB-CORE-LEDG-02",   "from_crit": 10},
+            {"from_id": "SRV-MID-SWI-03",   "to_id": "SRV-CORE-CBS-01",   "from_crit": 10},
+            # Core internal
+            {"from_id": "SRV-CORE-CBS-01",  "to_id": "DB-CORE-LEDG-02",   "from_crit": 10},
+            {"from_id": "SRV-CORE-CBS-01",  "to_id": "SRV-MGMT-JUMP-02",  "from_crit": 10},
+            # Management
+            {"from_id": "SRV-MGMT-AD-01",   "to_id": "SRV-DMZ-WEB-01",    "from_crit": 10},
+            {"from_id": "SRV-MGMT-AD-01",   "to_id": "SRV-MID-ESB-01",    "from_crit": 10},
+            {"from_id": "SRV-MGMT-AD-01",   "to_id": "SRV-CORE-CBS-01",   "from_crit": 10},
+            {"from_id": "SRV-MGMT-JUMP-02", "to_id": "SRV-CORE-CBS-01",   "from_crit":  8},
+            {"from_id": "SRV-MGMT-JUMP-02", "to_id": "DB-CORE-LEDG-02",   "from_crit":  8},
+            {"from_id": "SRV-MGMT-JUMP-02", "to_id": "SRV-CORE-SWIFT-03", "from_crit":  8},
+            {"from_id": "SRV-MGMT-SIEM-03", "to_id": "SRV-MGMT-AD-01",    "from_crit":  8},
         ]
         return nodes, edges
 
     def _mock_asset_risks(self) -> dict[str, dict]:
+        """12-asset CVE risk map fallback using real CVEs from the library."""
         from ml.risk_scorer import RiskScorer
         scorer = RiskScorer()
+        # (assetId, cveId, cvss, epss, isKEV, criticality)
         mock_cves = [
-            ("Asset_1", "CVE-2026-1043", 9.8, 0.9452, True,  10),
-            ("Asset_2", "CVE-2026-2090", 8.1, 0.7812, False,  9),
-            ("Asset_3", "CVE-2026-3022", 6.5, 0.0841, False,  8),
-            ("Asset_5", "CVE-2026-4401", 7.5, 0.6120, True,   9),
+            ("SRV-DMZ-WEB-01",   "CVE-2023-25690",  9.8, 0.9341, True,   8),
+            ("SRV-DMZ-GW-02",    "CVE-2022-41915",  7.5, 0.6230, False,  8),
+            ("SRV-DMZ-CMS-03",   "CVE-2021-29447",  8.0, 0.7812, True,   5),
+            ("SRV-MID-ESB-01",   "CVE-2021-44228", 10.0, 0.9763, True,   8),
+            ("SRV-MID-IAM-02",   "CVE-2022-37434",  9.8, 0.8912, True,  10),
+            ("SRV-MID-SWI-03",   "CVE-2023-28432",  7.5, 0.6540, True,  10),
+            ("SRV-CORE-CBS-01",  "CVE-2023-21839",  7.5, 0.7234, True,  10),
+            ("DB-CORE-LEDG-02",  "CVE-2022-21569",  7.5, 0.5810, False, 10),
+            ("SRV-CORE-SWIFT-03","CVE-2023-38606",  7.8, 0.6980, True,  10),
+            ("SRV-MGMT-AD-01",   "CVE-2022-26925",  9.8, 0.9120, True,  10),
+            ("SRV-MGMT-JUMP-02", "CVE-2023-30570",  8.1, 0.7456, False,  8),
+            ("SRV-MGMT-SIEM-03", "CVE-2023-31414",  7.5, 0.5230, False,  8),
         ]
         risk_map: dict[str, dict] = {}
         for aid, cve_id, cvss, epss, kev, crit in mock_cves:
@@ -528,12 +567,20 @@ class AttackPathAnalyzer:
         return risk_map
 
     def _mock_critical_assets_rows(self, min_criticality: int) -> list[dict]:
+        """12-asset fallback for get_critical_assets() in mock mode."""
         all_assets = [
-            {"assetId": "Asset_1", "name": "Web Application Gateway", "type": "Gateway",      "criticality": 10, "exposure": "Public",   "owner": "Platform Team",     "environment": "Production", "vulnerabilityCount": 2, "maxCvssScore": 9.8, "cveIds": ["CVE-2026-1043", "CVE-2026-4401"]},
-            {"assetId": "Asset_2", "name": "Authentication Service",  "type": "Microservice", "criticality":  9, "exposure": "Internal", "owner": "Identity Team",     "environment": "Production", "vulnerabilityCount": 1, "maxCvssScore": 8.1, "cveIds": ["CVE-2026-2090"]},
-            {"assetId": "Asset_5", "name": "Edge Firewall Router",    "type": "NetworkDevice","criticality":  9, "exposure": "Public",   "owner": "NetOps",            "environment": "Production", "vulnerabilityCount": 1, "maxCvssScore": 7.5, "cveIds": ["CVE-2026-4401"]},
-            {"assetId": "Asset_3", "name": "Admin Dashboard",         "type": "WebApp",       "criticality":  8, "exposure": "Internal", "owner": "Engineering",       "environment": "Production", "vulnerabilityCount": 1, "maxCvssScore": 6.5, "cveIds": ["CVE-2026-3022"]},
-            {"assetId": "Asset_4", "name": "Core Database Cluster",   "type": "Database",     "criticality": 10, "exposure": "Private",  "owner": "Data Platform Team","environment": "Production", "vulnerabilityCount": 0, "maxCvssScore": 0.0, "cveIds": []},
+            {"assetId": "SRV-DMZ-WEB-01",   "name": "Retail Internet Banking Web Server", "type": "Gateway",       "criticality":  8, "exposure": "Public",    "owner": "Digital Banking Team", "environment": "Production", "vulnerabilityCount": 1, "maxCvssScore": 9.8,  "cveIds": ["CVE-2023-25690"]},
+            {"assetId": "SRV-DMZ-GW-02",    "name": "Mobile Banking API Gateway",         "type": "Gateway",       "criticality":  8, "exposure": "Public",    "owner": "Platform Engineering","environment": "Production", "vulnerabilityCount": 1, "maxCvssScore": 7.5,  "cveIds": ["CVE-2022-41915"]},
+            {"assetId": "SRV-DMZ-CMS-03",   "name": "Public CMS Portal",                  "type": "WebApp",        "criticality":  5, "exposure": "Public",    "owner": "Marketing IT",        "environment": "Production", "vulnerabilityCount": 1, "maxCvssScore": 8.0,  "cveIds": ["CVE-2021-29447"]},
+            {"assetId": "SRV-MID-ESB-01",   "name": "Enterprise Service Bus",             "type": "Middleware",    "criticality":  8, "exposure": "Internal",  "owner": "Integration Team",    "environment": "Production", "vulnerabilityCount": 1, "maxCvssScore": 10.0, "cveIds": ["CVE-2021-44228"]},
+            {"assetId": "SRV-MID-IAM-02",   "name": "Customer Identity & Access Manager", "type": "IAM",           "criticality": 10, "exposure": "Internal",  "owner": "Identity Team",       "environment": "Production", "vulnerabilityCount": 1, "maxCvssScore": 9.8,  "cveIds": ["CVE-2022-37434"]},
+            {"assetId": "SRV-MID-SWI-03",   "name": "Universal Payment Switch",           "type": "PaymentSwitch", "criticality": 10, "exposure": "Internal",  "owner": "Payments Team",       "environment": "Production", "vulnerabilityCount": 1, "maxCvssScore": 7.5,  "cveIds": ["CVE-2023-28432"]},
+            {"assetId": "SRV-CORE-CBS-01",  "name": "Core Banking System App Server",     "type": "AppServer",     "criticality": 10, "exposure": "Private",   "owner": "CBS Team",            "environment": "Production", "vulnerabilityCount": 1, "maxCvssScore": 7.5,  "cveIds": ["CVE-2023-21839"]},
+            {"assetId": "DB-CORE-LEDG-02",  "name": "Central Production Database",        "type": "Database",      "criticality": 10, "exposure": "Private",   "owner": "Data Platform Team",  "environment": "Production", "vulnerabilityCount": 1, "maxCvssScore": 7.5,  "cveIds": ["CVE-2022-21569"]},
+            {"assetId": "SRV-CORE-SWIFT-03","name": "SWIFT Transaction Appliance",        "type": "SWIFT",         "criticality": 10, "exposure": "Private",   "owner": "Treasury Operations",  "environment": "Production", "vulnerabilityCount": 1, "maxCvssScore": 7.8,  "cveIds": ["CVE-2023-38606"]},
+            {"assetId": "SRV-MGMT-AD-01",   "name": "Active Directory Domain Controller", "type": "AD",            "criticality": 10, "exposure": "Internal",  "owner": "IT Operations",       "environment": "Production", "vulnerabilityCount": 1, "maxCvssScore": 9.8,  "cveIds": ["CVE-2022-26925"]},
+            {"assetId": "SRV-MGMT-JUMP-02", "name": "Enterprise Jump Server / Bastion",   "type": "Bastion",       "criticality":  8, "exposure": "Internal",  "owner": "IT Security",         "environment": "Production", "vulnerabilityCount": 1, "maxCvssScore": 8.1,  "cveIds": ["CVE-2023-30570"]},
+            {"assetId": "SRV-MGMT-SIEM-03", "name": "SIEM & Log Aggregator Node",         "type": "SIEM",          "criticality":  8, "exposure": "Internal",  "owner": "SOC Team",            "environment": "Production", "vulnerabilityCount": 1, "maxCvssScore": 7.5,  "cveIds": ["CVE-2023-31414"]},
         ]
         return [a for a in all_assets if a["criticality"] >= min_criticality]
 

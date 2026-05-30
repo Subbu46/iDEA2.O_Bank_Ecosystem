@@ -284,6 +284,43 @@ class Neo4jClient:
     def _mock_run_query(self, query: str) -> list[dict]:
         """Minimal mock query dispatcher for the frontend."""
         q = query.upper()
+        if "HAS_VULNERABILITY" in q:
+            rows = []
+            for rel in self.mock_relationships:
+                if rel["type"] == "HAS_VULNERABILITY":
+                    asset = self.mock_nodes.get(rel["from"])
+                    cve = self.mock_nodes.get(rel["to"])
+                    if asset and cve:
+                        # Find mapped MITRE technique
+                        tech_id = ""
+                        tech_name = ""
+                        for t_rel in self.mock_relationships:
+                            if t_rel["from"] == cve["id"] and t_rel["type"] == "MAPS_TO_TECHNIQUE":
+                                tech_id = t_rel["to"]
+                                tech_node = self.mock_nodes.get(tech_id)
+                                if tech_node:
+                                    tech_name = tech_node.get("name", "")
+                                break
+                        
+                        rows.append({
+                            "assetName": asset.get("name", "Unknown Asset"),
+                            "assetId": asset.get("id", ""),
+                            "assetCriticality": asset.get("criticality", 5),
+                            "assetType": asset.get("type", "Server"),
+                            "cveId": cve.get("cveId") or cve.get("id") or "UNKNOWN",
+                            "cvssScore": cve.get("cvssScore") or cve.get("cvss_score") or 5.0,
+                            "epssScore": cve.get("epssScore") or cve.get("epss_score") or 0.015,
+                            "isKEV": bool(cve.get("isKEV") or cve.get("is_kev") or False),
+                            "severity": cve.get("severity", "MEDIUM"),
+                            "kevDueDate": cve.get("kevDueDate", "N/A"),
+                            "description": cve.get("description", ""),
+                            "techniqueId": tech_id,
+                            "techniqueName": tech_name
+                        })
+            # Sort mock data by cvssScore DESC just like the Cypher query does
+            rows.sort(key=lambda x: x.get("cvssScore", 0.0), reverse=True)
+            return rows
+
         if "MATCH (N)" in q or "MATCH (N:" in q:
             return [{"n": v} for v in self.mock_nodes.values()]
         if "MATCH (A)-[R]->(B)" in q or "MATCH ()-[R]->()" in q:
@@ -296,42 +333,149 @@ class Neo4jClient:
 
     def _init_mock_data(self):
         """Seed the in-memory mock store with representative graph data."""
-        self.mock_nodes = {
-            "asset-web-gw": {
-                "id": "asset-web-gw", "label": "Asset",
-                "name": "Web Gateway", "type": "Server",
-                "criticality": 10, "assetId": "asset-web-gw"
-            },
-            "asset-db-cluster": {
-                "id": "asset-db-cluster", "label": "Asset",
-                "name": "Core DB Cluster", "type": "Database",
-                "criticality": 9, "assetId": "asset-db-cluster"
-            },
-            "asset-auth-api": {
-                "id": "asset-auth-api", "label": "Asset",
-                "name": "Auth API", "type": "Microservice",
-                "criticality": 8, "assetId": "asset-auth-api"
-            },
-            "CVE-2021-44228": {
-                "id": "CVE-2021-44228", "label": "CVE",
-                "name": "CVE-2021-44228", "cveId": "CVE-2021-44228",
-                "severity": "CRITICAL", "cvssScore": 10.0,
-                "isKEV": True, "epssScore": 0.97
-            },
-            "T1190": {
-                "id": "T1190", "label": "Technique",
-                "name": "Exploit Public-Facing Application",
-                "techniqueId": "T1190", "tactics": ["initial-access"]
-            },
-            "apt29": {
-                "id": "apt29", "label": "ThreatActor",
-                "name": "APT29", "motivation": "espionage"
-            },
-        }
-        self.mock_relationships = [
-            {"from": "CVE-2021-44228", "to": "T1190",         "type": "EXPLOITED_BY"},
-            {"from": "CVE-2021-44228", "to": "asset-web-gw",  "type": "AFFECTS"},
-            {"from": "T1190",          "to": "apt29",          "type": "USED_BY"},
-            {"from": "asset-web-gw",   "to": "asset-auth-api", "type": "CONNECTS_TO"},
-            {"from": "asset-auth-api", "to": "asset-db-cluster", "type": "CONNECTS_TO"},
-        ]
+        self.mock_nodes = {}
+        self.mock_relationships = []
+
+        try:
+            from graph.graph_builder import ASSETS, TOPOLOGY, CVE_LIBRARY
+            from ingestion.mitre_fetcher import MitreFetcher
+            mitre = MitreFetcher()
+
+            # Add Asset nodes
+            for asset in ASSETS:
+                self.mock_nodes[asset["id"]] = {
+                    "id": asset["id"],
+                    "label": "Asset",
+                    "name": asset["name"],
+                    "type": asset["type"],
+                    "zone": asset["zone"],
+                    "criticality": asset["criticality"],
+                    "exposure": asset["exposure"],
+                    "ip_address": asset["ip_address"],
+                    "os_version": asset["os_version"],
+                    "owner": asset["owner"],
+                    "environment": asset["environment"],
+                    "software_stack": ",".join(asset["software_stack"]),
+                    "assetId": asset["id"]
+                }
+
+            # Add lateral connection relationships (Asset connects to Asset)
+            for src_id, tgt_id in TOPOLOGY:
+                self.mock_relationships.append({
+                    "from": src_id,
+                    "to": tgt_id,
+                    "type": "CONNECTS_TO"
+                })
+
+            # Add Vulnerability nodes and their relationship to Assets (software-stack based)
+            for cve in CVE_LIBRARY:
+                cve_id = cve["cve_id"]
+                self.mock_nodes[cve_id] = {
+                    "id": cve_id,
+                    "label": "CVE",
+                    "name": cve_id,
+                    "cveId": cve_id,
+                    "cvssScore": cve["cvss_score"],
+                    "severity": cve["severity"],
+                    "description": cve["description"],
+                    "affected_product": cve["affected_product"],
+                    "published_date": cve["published_date"],
+                    "isKEV": cve_id in ["CVE-2021-44228", "CVE-2023-25690", "CVE-2022-26925"],
+                    "epssScore": 0.85 if cve["cvss_score"] > 9.0 else 0.45
+                }
+                
+                # Map CVE to Asset based on software stack
+                affected_product = cve["affected_product"]
+                for asset in ASSETS:
+                    if affected_product in asset["software_stack"]:
+                        self.mock_relationships.append({
+                            "from": asset["id"],
+                            "to": cve_id,
+                            "type": "HAS_VULNERABILITY"
+                        })
+
+                # Map Technique details
+                attack_details = mitre.get_attack_details(cve_id)
+                tech_id = attack_details["technique_id"]
+                
+                # Add Technique node
+                if tech_id not in self.mock_nodes:
+                    self.mock_nodes[tech_id] = {
+                        "id": tech_id,
+                        "label": "Technique",
+                        "name": attack_details["technique_name"],
+                        "techniqueId": tech_id,
+                        "tactic": attack_details["tactic"],
+                        "capec_id": attack_details["capec_id"],
+                        "capec_name": attack_details["capec_name"]
+                    }
+                
+                # Map CVE -> Technique relationship
+                self.mock_relationships.append({
+                    "from": cve_id,
+                    "to": tech_id,
+                    "type": "MAPS_TO_TECHNIQUE"
+                })
+
+            # Add Threat Actors
+            threat_actors = [
+                {"id": "apt29", "name": "APT29", "motivation": "espionage", "origin": "Russia"},
+                {"id": "lazarus", "name": "Lazarus Group", "motivation": "financial", "origin": "North Korea"},
+                {"id": "lockbit", "name": "LockBit Ransomware", "motivation": "financial", "origin": "Cybercrime Syndicate"}
+            ]
+            
+            for ta in threat_actors:
+                self.mock_nodes[ta["id"]] = {
+                    "id": ta["id"],
+                    "label": "ThreatActor",
+                    "name": ta["name"],
+                    "motivation": ta["motivation"],
+                    "origin": ta["origin"]
+                }
+                
+            # Map Threat Actors to Techniques
+            self.mock_relationships.append({"from": "apt29", "to": "T1203", "type": "USES_TECHNIQUE"})
+            self.mock_relationships.append({"from": "lazarus", "to": "T1203", "type": "USES_TECHNIQUE"})
+            self.mock_relationships.append({"from": "lockbit", "to": "T1203", "type": "USES_TECHNIQUE"})
+
+        except Exception as e:
+            logger.error("Failed to populate 12-node topology mock data: %s. Using basic default mock data.", e)
+            self.mock_nodes = {
+                "asset-web-gw": {
+                    "id": "asset-web-gw", "label": "Asset",
+                    "name": "Web Gateway", "type": "Server",
+                    "criticality": 10, "assetId": "asset-web-gw"
+                },
+                "asset-db-cluster": {
+                    "id": "asset-db-cluster", "label": "Asset",
+                    "name": "Core DB Cluster", "type": "Database",
+                    "criticality": 9, "assetId": "asset-db-cluster"
+                },
+                "asset-auth-api": {
+                    "id": "asset-auth-api", "label": "Asset",
+                    "name": "Auth API", "type": "Microservice",
+                    "criticality": 8, "assetId": "asset-auth-api"
+                },
+                "CVE-2021-44228": {
+                    "id": "CVE-2021-44228", "label": "CVE",
+                    "name": "CVE-2021-44228", "cveId": "CVE-2021-44228",
+                    "severity": "CRITICAL", "cvssScore": 10.0,
+                    "isKEV": True, "epssScore": 0.97
+                },
+                "T1190": {
+                    "id": "T1190", "label": "Technique",
+                    "name": "Exploit Public-Facing Application",
+                    "techniqueId": "T1190", "tactics": ["initial-access"]
+                },
+                "apt29": {
+                    "id": "apt29", "label": "ThreatActor",
+                    "name": "APT29", "motivation": "espionage"
+                },
+            }
+            self.mock_relationships = [
+                {"from": "CVE-2021-44228", "to": "T1190",         "type": "EXPLOITED_BY"},
+                {"from": "CVE-2021-44228", "to": "asset-web-gw",  "type": "AFFECTS"},
+                {"from": "T1190",          "to": "apt29",          "type": "USED_BY"},
+                {"from": "asset-web-gw",   "to": "asset-auth-api", "type": "CONNECTS_TO"},
+                {"from": "asset-auth-api", "to": "asset-db-cluster", "type": "CONNECTS_TO"},
+            ]

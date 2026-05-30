@@ -128,11 +128,19 @@ export const redteamApi = {
 // ── Gen-AI Threat Intelligence ────────────────────────────────────────────────
 export const genaiApi = {
   /**
-   * Run Gen-AI analysis on the full CVE dataset.
+   * Run Gen-AI analysis on the full CVE dataset (legacy non-streaming).
    * Returns { analysis: string, dataset_size: number, generated_at: string }
    */
   analyseThreats: () =>
     client.post('/genai/analyse-threats').then(r => r.data),
+
+  /**
+   * NEW: Full 7-step analysis pipeline via SSE streaming.
+   * Returns an EventSource connected to /genai/run-full-analysis.
+   * The caller receives events of type: step, playbook_progress, playbook_ready, complete.
+   * @returns {EventSource}
+   */
+  runFullAnalysis: () => new EventSource(`${API_BASE}/genai/run-full-analysis`),
 
   /**
    * Generate a remediation playbook for a specific alert.
