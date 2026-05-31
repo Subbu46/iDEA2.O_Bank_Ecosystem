@@ -2,9 +2,10 @@ import axios from 'axios';
 
 // Dynamically target backend URL (port 8000 in dev or mapped proxy)
 const API_BASE_URL = "https://idea2-o-bank-ecosystem.onrender.com";
+const API_BASE = API_BASE_URL;
 
 const client = axios.create({
-  baseURL: API_BASE,
+  baseURL: API_BASE_URL,
   timeout: 30000,   // 30s — attack-path analysis can take a moment
   headers: {
     'Content-Type': 'application/json',
@@ -140,8 +141,7 @@ export const genaiApi = {
    * The caller receives events of type: step, playbook_progress, playbook_ready, complete.
    * @returns {EventSource}
    */
-  runFullAnalysis: () => new EventSource(`${API_BASE}/genai/run-full-analysis`),
-
+  runFullAnalysis: () => new EventSource(`${API_BASE_URL}/genai/run-full-analysis`),
   /**
    * Generate a remediation playbook for a specific alert.
    * Accepts any alert object and maps to the legacy /playbooks/generate API.
