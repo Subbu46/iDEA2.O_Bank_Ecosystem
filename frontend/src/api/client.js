@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Dynamically target backend URL (port 8000 in dev or mapped proxy)
-const API_BASE = 'http://localhost:8000/api';
+const API_BASE_URL = "https://idea2-o-bank-ecosystem.onrender.com";
 
 const client = axios.create({
   baseURL: API_BASE,
