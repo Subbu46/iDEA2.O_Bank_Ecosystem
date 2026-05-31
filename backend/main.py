@@ -12,7 +12,8 @@ from config import settings
 from api import routes_graph, routes_alerts, routes_playbook, routes_redteam, routes_genai
 from graph.neo4j_client import Neo4jClient
 from graph.graph_builder import GraphBuilder
-
+from fastapi.staticfiles import StaticFiles
+from pathlib import Path 
 # Configure logger
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("sarathi.main")
