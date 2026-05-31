@@ -5,7 +5,7 @@ const API_BASE_URL = "https://idea2-o-bank-ecosystem.onrender.com";
 const API_BASE = API_BASE_URL;
 
 const client = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: `${API_BASE_URL}/api`,
   timeout: 30000,   // 30s — attack-path analysis can take a moment
   headers: {
     'Content-Type': 'application/json',
@@ -75,10 +75,10 @@ export const graphApi = {
     client.post('/graph/sync').then(r => r.data),
 };
 
-// ── Alerts ────────────────────────────────────────────────────────────────────
 export const alertsApi = {
-  listAlerts:   () =>
+  listAlerts: () =>
     client.get('/alerts').then(r => r.data),
+
   resolveAlert: (alertId, status) =>
     client.post(`/alerts/${alertId}/resolve`, { status }).then(r => r.data),
 };
@@ -141,8 +141,8 @@ export const genaiApi = {
    * The caller receives events of type: step, playbook_progress, playbook_ready, complete.
    * @returns {EventSource}
    */
-  runFullAnalysis: () => new EventSource(`${API_BASE_URL}/genai/run-full-analysis`),
-  /**
+runFullAnalysis: () =>
+  new EventSource(`${API_BASE_URL}/api/genai/run-full-analysis`),  /**
    * Generate a remediation playbook for a specific alert.
    * Accepts any alert object and maps to the legacy /playbooks/generate API.
    * @param {{ cve_id?: string, asset_id?: string, technique_id?: string, message?: string }} alert
