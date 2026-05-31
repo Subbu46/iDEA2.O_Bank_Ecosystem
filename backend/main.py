@@ -47,12 +47,24 @@ app.include_router(routes_redteam.router, prefix="/api")
 app.include_router(routes_genai.router, prefix="/api")
 
 # Serve 3D GLB models for the Digital Twin frontend
-import os
-_glb_dir = os.path.join(os.path.dirname(__file__), "glb_files")
-if os.path.isdir(_glb_dir):
-    app.mount("/api/models", StaticFiles(directory=_glb_dir), name="3d_models")
+# Serve 3D GLB models for Digital Twin
+BASE_DIR = Path(__file__).resolve().parent
+GLB_DIR = BASE_DIR / "glb_files"
 
+print(f"GLB_DIR = {GLB_DIR}")
 
+app.mount(
+    "/api/models",
+    StaticFiles(directory=str(GLB_DIR)),
+    name="3d_models"
+)
+@app.get("/api/models-test")
+def models_test():
+    import os
+    return {
+        "exists": os.path.exists(GLB_DIR),
+        "files": os.listdir(GLB_DIR) if os.path.exists(GLB_DIR) else []
+    }
 
 @app.on_event("startup")
 def startup_event():
